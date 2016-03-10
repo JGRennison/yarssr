@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+#
+# yarssr - Yet Another RSS Reader
+# Copyright (C) 2004 Lee Aylward <lee@laylward.com>
+# http://yarssr.sourceforge.net
+# Licensed under the GPL
+#
+
+use strict;
+
+use lib (-e '@LIBDIR@' ? '@LIBDIR@' : $ENV{PWD}.'/lib/');
+
+use Yarssr;
+use Getopt::Long;
+
+my $result = GetOptions ("debug" 	=> \$Yarssr::debug,
+						 "help"		=> \&show_help,
+					 	 "version"	=> \&show_version);
+
+$SIG{TERM} = \&Yarssr::quit;
+$SIG{INT} = \&Yarssr::quit;
+
+$Yarssr::PREFIX = (-e '@PREFIX@' ? '@PREFIX@' : $ENV{PWD});
+$Yarssr::LIBDIR = (-e '@LIBDIR@' ? '@LIBDIR@' : $ENV{PWD}.'/lib');
+
+Yarssr->init;
+
+sub show_help {
+	print <<EOF
+Usage: yarssr [OPTION]
+
+	--debug				show debugging information
+	--help				show help
+	--version			display yarssr version
+EOF
+	;
+	exit;
+}
+
+sub show_version {
+	print "yarssr version $Yarssr::VERSION\n";
+	exit;
+}

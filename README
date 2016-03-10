@@ -1,0 +1,23 @@
+Yarssr, a RSS reader for the GNOME Tray
+Author: Lee Aylward <lee@laylward.com>
+http://yarssr.sf.net
+
+Perl Module requirements:
+
+XML::RSS
+Gtk2 (http://gtk2-perl.sf.net)
+Gtk2::GladeXML
+Gtk2::TrayIcon
+Gnome2::VFS 
+Gnome2 >= 0.94 
+
+Check INSTALL file for installation directions.
+
+Just run 'yarssr'. Wait while it retrieves the RSS feeds,
+and then displays them in the tray. Preferences allows you
+to add feeds and adjust the interval time.
+
+If you have problems upgrading from an old version of Yarssr, it is
+recommended that you delete your ~/.yarssr directory.
+
+Improvements welcome.

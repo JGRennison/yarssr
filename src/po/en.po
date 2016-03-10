@@ -1,0 +1,126 @@
+# English translation of yarssr.
+# Lee Aylward <lee@laylward.com>, 2005.
+# 
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: yarssr 0.2.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-03-01 22:42-0500\n"
+"PO-Revision-Date: 2005-03-01 22:43-0500\n"
+"Last-Translator: Lee Aylward <lee@laylward.com>\n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: "
+
+#, fuzzy
+msgid "Loading state for {feed}"
+msgstr "Donging {feed}"
+
+msgid "Downloading {feed}"
+msgstr ""
+
+msgid "Writing state for {feed}"
+msgstr ""
+
+# debug messages
+msgid "Loading previous session"
+msgstr ""
+
+msgid "Successfully loaded previous session"
+msgstr ""
+
+msgid "Successfully loaded config"
+msgstr ""
+
+msgid "Rebuilding menu"
+msgstr ""
+
+msgid "Parsing"
+msgstr ""
+
+msgid "Writing config"
+msgstr ""
+
+# Prefs menu
+msgid "Go _Online"
+msgstr ""
+
+msgid "Go _Offline"
+msgstr ""
+
+msgid "_About"
+msgstr ""
+
+# Feeds menu
+msgid "updating..."
+msgstr ""
+
+msgid "_Unmark new"
+msgstr ""
+
+msgid "Update this feed"
+msgstr ""
+
+# Prefs window
+msgid "Name"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Address"
+msgstr ""
+
+msgid "Properties"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "New"
+msgstr ""
+
+msgid "Import OPML"
+msgstr ""
+
+msgid "Update Interval (min)"
+msgstr ""
+
+msgid "Start Online"
+msgstr ""
+
+msgid "Headings Displayed"
+msgstr ""
+
+msgid "Browser Command:\n (%s for URL)"
+msgstr ""
+
+msgid "Gnome Default"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "OK"
+msgstr ""
+
+msgid "Name:"
+msgstr ""
+
+msgid "Address:"
+msgstr ""
+
+msgid "Options"
+msgstr ""
+
+msgid "Username:"
+msgstr ""
+
+msgid "Password:"
+msgstr ""
+
+msgid "Path or URL"
+msgstr ""

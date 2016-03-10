@@ -1,0 +1,12 @@
+To build yarssr simply run
+	
+	make
+
+and to install yarssr run
+	
+	make install
+
+This will install in /usr/local/bin by default. Use PREFIX to install
+elsewhere. e.g.
+	
+	PREFIX=/usr && make install

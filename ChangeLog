@@ -1,0 +1,67 @@
+0.1.3
+	- UI fixes
+	- Fixed browser configuration
+
+0.1.4
+	- Now uses Gnome::VFS instead of LWP for retrieving (James Curbo)
+	  feeds.
+	- Menu doesn't create blank spots if there aren't enough
+	  feed items to fill it.
+	- Timer is properly created after the config is read.
+
+0.1.5
+	- Feeds now display site icon, if available.
+	- Option to use Gnome-default browser.
+	- Better feed error checking.
+	- Now uses proper dialogs for feed errors.
+
+0.1.7
+	- New preferences interface.
+	- Menu now indicates if an article has been read or not.
+	- Config is saved at more approriate times, to avoide
+	  lost changes.
+	- Gnome-default browser setting is saved properly.
+
+0.1.8
+	- Added Gnome Session support.
+	- Changed icon from check mark to a red dot.
+	- launch_url() now forks the browser before it updates.
+	  the menu. This results in the browser launching much
+	  faster.
+	- Icons added for 'Update' menu items, as well for Prefs
+	  and Quit.
+	- Browser command now accepts switches to the browser,
+	  and %s can be used to pass the URL to the browser as
+	  well. (Dan Lenski)
+	- List of feeds in the Preferences is now sortable.
+
+0.1.9
+	- No more empty child processes left behind by browser fork.
+	
+0.2.0
+	- Saves a feeds state, so feeds stay marked as read between 
+	  sessions.
+	- Marks new articles with a solid dot and unread articles
+	  with a hollow dot.
+	- Menu marks feeds with new articles with bold text.
+	- Feed properties are editable
+	- Able to enable/disable all feeds by clicking the column header
+	- Support for Atom feeds added.
+	- Tray icon notifies you if there are new items in the menu
+	- Tray icon has a tooltip with number of new items
+	- Right-clicking the icon brings up a seperate menu with
+	  preferences, about, and quit. Left-click brings up a menu
+	  with the feeds.
+
+0.2.1
+	- Feed state stored more often and more consistantly
+	- Error icon shown in menu if feed fails to download or parse
+	- Online and offline mode added
+
+0.2.2
+	- A few Online/Offline mode fixeds
+	- Username/Password option added to feeds
+	- OPML importing added
+	- Fixed bug that was leaving zombie processes after browsers were
+	  closed
+	- il8n support added

@@ -1,0 +1,9 @@
+TODO:
+- Make menu work while updating
+- Individual update intervals for feeds
+- Add translations
+
+Long term:
+- Clean the feed/items object interfaces
+- Add different parsing and downloading backends
+- Document what each module does
