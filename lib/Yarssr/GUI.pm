@@ -154,7 +154,7 @@ sub launch_url {
 	else {
 		if ($child = fork)
 		{
-			Glib::Idle->add(
+			Glib::Timeout->add(200,
 				sub {
 					my $kid = waitpid($child,WNOHANG);
 					$kid > 0 ? return 0 : return 1;
