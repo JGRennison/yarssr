@@ -2,29 +2,35 @@ package Yarssr::Parser;
 use Data::Dumper;
 use Yarssr::Item;
 use Yarssr::Feed;
+use XML::LibXML;
 use XML::Parser;
 use XML::RSS;
 
 $XML::RSS::AUTO_ADD = 1;
 
 sub parse {
-	push @XML::Parser::Expat::Encoding_Path, $Yarssr::PREFIX."/share/yarssr/encfiles";
-	my (undef,$feed,$content) = @_;
-	Yarssr->log_debug("Parsing ".$feed->get_title);
-	my $parser = new XML::Parser(Style => Tree);
-	my $parsetree = eval{ $parser->parse($content) };
+	my (undef, $feed, $content) = @_;
+	Yarssr->log_debug("Parsing " . $feed->get_title);
+	my $parser = XML::LibXML->new();
+	my $doc = eval{ $parser->parse_string($content) };
 
 	if ($@) {
 		Yarssr->log_debug($@);
 		return;
 	}
 
-	if ($parsetree->[0] eq "rss" or $parsetree->[0] eq "rdf"
-		or $parsetree->[0] eq "rdf:RDF") {
-		return parse_rss($feed,$content);
+	my $root_node_type = $doc->documentElement()->localname;
+
+	if ($root_node_type eq "rss" || $root_node_type eq "rdf"
+		or $root_node_type eq "RDF") {
+		return parse_rss($feed, $content);
 	}
-	elsif ($parsetree->[0] eq "feed") {
-		return parse_atom($feed,$parsetree);
+	elsif ($root_node_type eq "feed") {
+		return parse_atom($feed, $doc);
+	}
+	else {
+		Yarssr->log_debug("Cannot determine feed type");
+		return ();
 	}
 }
 
@@ -63,30 +69,34 @@ sub parse_rss
 }
 
 sub parse_atom {
-	my ($feed,$tree) = @_;
+	my ($feed, $doc) = @_;
 	my @items;
-	for (my $i = 0;$i < $#{$tree->[1]};$i++) {
-		if ($tree->[1][$i] eq "entry") {
-			my $item = $tree->[1][++$i];
-			my ($title,$link);
-			for (my $j=0;$j < $#{$item};$j++) {
-				if ($item->[$j] eq "title") {
-					$title = $item->[++$j][$#{$item->[$j]}];
-					$title =~ s/^\s*(.*)\s*$/$1/;
-				}
-				elsif ($item->[$j] eq "link"
-					and $item->[++$j][0]{'rel'} eq "alternate") {
-					$link = $item->[$j][0]{'href'};
-				}
+
+	my $xpc = XML::LibXML::XPathContext->new;
+	$xpc->registerNs('x', $doc->documentElement()->namespaceURI());
+	if ($doc->documentElement()->namespaceURI() ne 'http://www.w3.org/2005/Atom') {
+		Yarssr->log_debug("Unexpected namespace: " . $doc->documentElement()->namespaceURI());
+	}
+
+	foreach my $entry ($xpc->findnodes('x:entry', $doc->documentElement())) {
+		my ($title, $link);
+		foreach ($xpc->findnodes('x:title', $entry)) {
+			$title = $_->textContent;
+			$title =~ s/^\s*(.*)\s*$/$1/;
+		}
+		foreach ($xpc->findnodes('x:link', $entry)) {
+			if ($_->getAttribute("rel") eq "alternate" || !length $_->getAttribute("rel")) {
+				$link = $_->getAttribute("href");
 			}
-			if ($title and $link) {
-				my $article = Yarssr::Item->new(
-					title	=> $title,
-					url		=> $link,
-					id		=> $link."___".$title,
-				);
-				push @items,$article;
-			}
+		}
+
+		if ($title and $link) {
+			my $article = Yarssr::Item->new(
+				title	=> $title,
+				url		=> $link,
+				id		=> $link."___".$title,
+			);
+			push @items, $article;
 		}
 	}
 	return @items;
