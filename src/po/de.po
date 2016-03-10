@@ -1,0 +1,127 @@
+# German translation of yarssr.
+# Joachim Breitner <nomeata@debian.org>, 2005
+# 
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: yarssr 0.2.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-03-01 22:42-0500\n"
+"PO-Revision-Date: 2005-03-22 17:55+0100\n"
+"Last-Translator: Joachim Breitner <mail@joachim-breitner.de>\n"
+"Language-Team: German\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: "
+
+msgid "Loading state for {feed}"
+msgstr "Lade Zustand von {feed}"
+
+msgid "Downloading {feed}"
+msgstr "Lade {feed} herunter"
+
+msgid "Writing state for {feed}"
+msgstr "Speichere den Zustand von {feed}"
+
+# debug messages
+msgid "Loading previous session"
+msgstr "Lade letzte Sitzung"
+
+msgid "Successfully loaded previous session"
+msgstr "Erfolgreich letzte Sitzung geladen"
+
+msgid "Successfully loaded config"
+msgstr "Konfiguration erfolgreich geladen"
+
+msgid "Rebuilding menu"
+msgstr "Baue Menü neu auf"
+
+msgid "Parsing"
+msgstr "Einlesen"
+
+msgid "Writing config"
+msgstr "Schreibe Einstellungen"
+
+# Prefs menu
+msgid "Go _Online"
+msgstr "Gehe _Online"
+
+msgid "Go _Offline"
+msgstr "Gehe _Offline"
+
+msgid "_About"
+msgstr "_Info"
+
+# Feeds menu
+msgid "updating..."
+msgstr "aktualisieren..."
+
+msgid "_Unmark new"
+msgstr "_Neue als alt markieren"
+
+msgid "Update this feed"
+msgstr "Aktualisiere diesen Feed"
+
+# Prefs window
+msgid "Name"
+msgstr "Name"
+
+msgid "Enabled"
+msgstr "Aktiv"
+
+msgid "Address"
+msgstr "Adresse"
+
+msgid "Properties"
+msgstr "Eigenschaften"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "New"
+msgstr "Neu"
+
+msgid "Import OPML"
+msgstr "Importiere OPML"
+
+msgid "Update Interval (min)"
+msgstr "Aktualisierungsinterval (min)"
+
+msgid "Start Online"
+msgstr "Starte online"
+
+msgid "Headings Displayed"
+msgstr "Angezeigte Kopfzeilen"
+
+msgid "Browser Command:\n (%s for URL)"
+msgstr "Browserbefehl:\n"
+"(%s für den URL)"
+
+msgid "Gnome Default"
+msgstr "Gnome-Standard"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Name:"
+msgstr "Name:"
+
+msgid "Address:"
+msgstr "Adresse:"
+
+msgid "Options"
+msgstr "Optionen"
+
+msgid "Username:"
+msgstr "Benutzername"
+
+msgid "Password:"
+msgstr "Passwort:"
+
+msgid "Path or URL"
+msgstr "Pfad oder URL"
+

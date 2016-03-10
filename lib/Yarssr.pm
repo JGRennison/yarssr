@@ -26,13 +26,13 @@ our @EXPORT_OK = qw(_);
 my $feeds = ();
 $0 = $NAME;
 
-# il8n stuff 
-my $locale = (defined($ENV{LC_MESSAGES}) ? $ENV{LC_MESSAGES} : $ENV{LANG});
-setlocale(LC_ALL, $locale);
-bindtextdomain(lc($NAME), sprintf('%s/share/locale', $PREFIX));
-textdomain(lc($NAME));
-
 sub init {
+	# il8n stuff 
+	my $locale = (defined($ENV{LC_MESSAGES}) ? $ENV{LC_MESSAGES} : $ENV{LANG});
+	setlocale(LC_ALL, $locale);
+	bindtextdomain(lc($NAME), sprintf('%s/share/locale', $PREFIX));
+	textdomain(lc($NAME));
+
 	# Wait 2 seconds before loading config and begining downloads
     Gnome2::Program->init($0,$VERSION);
     Glib::Timeout->add(1000,\&initial_launch);

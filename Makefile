@@ -15,12 +15,15 @@ yarssr:
 
 	mkdir -p build/locale/en/$(LC_CATEGORY)
 	msgfmt -o build/locale/en/$(LC_CATEGORY)/yarssr.mo src/po/en.po
+	mkdir -p build/locale/de/$(LC_CATEGORY)
+	msgfmt -o build/locale/de/$(LC_CATEGORY)/yarssr.mo src/po/de.po
 
 install:
 	mkdir -p	$(DESTDIR)/$(BINDIR) \
 				$(DESTDIR)/$(DATADIR) \
 				$(DESTDIR)/$(LIBDIR) \
-				$(DESTDIR)/$(LOCALEDIR)/en/$(LC_CATEGORY)
+				$(DESTDIR)/$(LOCALEDIR)/en/$(LC_CATEGORY) \
+				$(DESTDIR)/$(LOCALEDIR)/de/$(LC_CATEGORY)
 			
 	@echo Copying lib files to $(DESTDIR)/$(DATADIR):
 	@cp -Rp lib/* $(DESTDIR)/$(LIBDIR)/
@@ -31,6 +34,7 @@ install:
 	find $(DESTDIR)/$(LIBDIR) -type f -exec chmod 644 "{}" \;
 
 	install -m 0644 build/locale/en/$(LC_CATEGORY)/yarssr.mo $(DESTDIR)/$(LOCALEDIR)/en/$(LC_CATEGORY)/
+	install -m 0644 build/locale/de/$(LC_CATEGORY)/yarssr.mo $(DESTDIR)/$(LOCALEDIR)/de/$(LC_CATEGORY)/
 	install -m 0755 build/yarssr	$(DESTDIR)/$(BINDIR)
 
 clean:

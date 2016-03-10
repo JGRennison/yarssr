@@ -631,7 +631,7 @@ sub on_about_button_clicked {
 	$author .= "\n$_" for @Yarssr::TESTERS;
     my $about = Gnome2::About->new(
 		$Yarssr::NAME,$Yarssr::VERSION,$Yarssr::LICENSE,
-		$Yarssr::URL,$author,undef,undef,$logo);
+		$Yarssr::URL,$author,undef,'German Translation: Joachim Breitner <mail@joachim-breitner.de>',$logo);
     $about->show;
 }
 
