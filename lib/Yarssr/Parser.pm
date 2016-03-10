@@ -83,7 +83,7 @@ sub parse_atom {
 		my $article = Yarssr::Item->new(
 		    title	=> $title,
 		    url		=> $link,
-		    id		=> $link."___".$item->{'title'},
+		    id		=> $link."___".$title,
 		);
 		push @items,$article;
 	    }
