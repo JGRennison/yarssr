@@ -163,8 +163,15 @@ sub launch_url {
 		}
 		else {
 			my $b = Yarssr::Config->get_browser;
-			$b .= " \"$url\"" unless $b =~ s/\%s/"$url"/;
-			exec($b) or warn "unable to launch browser\n";
+			my @b = split(' ', Yarssr::Config->get_browser);
+			if (grep(/\%s/, @b))
+			{
+				map {grep(s/\%s/$url/, $_) => $_} @b;
+			}
+			else {
+				push(@b, $url);
+			}
+			exec(@b) or warn "unable to launch browser\n";
 			exit;
 		}
 	}
