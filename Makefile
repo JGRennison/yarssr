@@ -1,6 +1,6 @@
-PREFIX=/usr/local
+PREFIX=/usr
 BINDIR=$(PREFIX)/bin
-LIBDIR=$(PREFIX)/lib/yarssr
+LIBDIR=$(PREFIX)/share/yarssr
 DATADIR=$(PREFIX)/share
 LOCALEDIR=$(DATADIR)/locale
 
