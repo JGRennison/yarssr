@@ -54,6 +54,7 @@ sub parse_rss
 			my $article = Yarssr::Item->new(
 				url	=> $link,
 				title	=> $item->{'title'},
+				id	=> $link."___".$item->{'title'},
 			);
 			push @items, $article;
 		}
@@ -82,6 +83,7 @@ sub parse_atom {
 		my $article = Yarssr::Item->new(
 		    title	=> $title,
 		    url		=> $link,
+		    id		=> $link."___".$item->{'title'},
 		);
 		push @items,$article;
 	    }

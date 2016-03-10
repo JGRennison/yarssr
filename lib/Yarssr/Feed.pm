@@ -155,7 +155,7 @@ sub update
 		
 		for my $item (reverse @items) {
 		    Yarssr::GUI->gui_update;
-			unless ($self->get_item_by_url($item->get_url)) {
+			unless ($self->get_item_by_id($item->get_id)) {
 			    $self->unshift_item($item);
 			    $item->set_parent($self);
 			 }
@@ -173,11 +173,11 @@ sub get_status {
 	return $self->{status};
 }
 
-sub get_item_by_url {
+sub get_item_by_id {
     my $self = shift;
-    my $url = shift;
+    my $id = shift;
     for (@{$self->{'items'}}) {
-	return $_ if $_->get_url eq $url;
+	return $_ if $_->get_id eq $id;
     }
     return 0;
 }

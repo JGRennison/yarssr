@@ -186,6 +186,7 @@ sub load_state
 			my $item = Yarssr::Item->new(
 				title	=> $_->{'title'},
 				url	=> $_->{'link'},
+				id	=> $_->{'link'}."___".$_->{'title'},
 				parent	=> $feed,
 			);
 			$item->set_status($read);

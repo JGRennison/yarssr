@@ -18,7 +18,7 @@ sub new {
 	bless $self,$class;
 }
 
-foreach my $field (qw(title url status parent)) {
+foreach my $field (qw(title url status parent id)) {
 	*{"get_$field"} = sub {
 		my $self = shift;
 		return $self->{$field};
