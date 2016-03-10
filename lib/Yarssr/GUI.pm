@@ -524,6 +524,15 @@ sub create_feed_menu {
 			set_icon_inactive();
 		});
 	$feed->get_menu->append($update);
+	my $unmark = Gtk2::ImageMenuItem->new(_("Unmark new"));
+	$unmark->set_image(Gtk2::Image->new_from_stock('gtk-clear','menu'));
+	$unmark->signal_connect('activate',sub{ 
+			set_icon_active();
+			Yarssr->clear_newitems_in_feed($feed);
+			redraw_menu();
+			set_icon_inactive();
+		});
+	$feed->get_menu->append($unmark);
 	$feed->get_menu->show_all;
 }	
 

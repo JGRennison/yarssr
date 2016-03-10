@@ -137,11 +137,11 @@ sub update
 	my @items;
 
 	# Set new items as unread
-	for ($self->get_items_array) {
-	    $_->set_status(2) if $_->get_status > 2;
-	}
+	#for ($self->get_items_array) {
+	#    $_->set_status(2) if $_->get_status > 2;
+	#}
 	
-	$self->reset_newitems();
+	#$self->reset_newitems();
 	$self->enable if ($self->get_enabled == 3);
 	my $content = Yarssr::Fetcher->fetch_feed($self);
 

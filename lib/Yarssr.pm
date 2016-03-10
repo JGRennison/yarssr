@@ -153,6 +153,12 @@ sub clear_newitems {
 	}
 }
 
+sub clear_newitems_in_feed {
+	my (undef,$feed) = @_;
+	$feed->clear_newitems;
+	$feed->reset_newitems;
+}
+
 sub _ {
 	my $str = shift;
 	my %params = @_;
