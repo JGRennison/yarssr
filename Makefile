@@ -24,14 +24,11 @@ install:
 				$(DESTDIR)/$(LIBDIR) \
 				$(DESTDIR)/$(LOCALEDIR)/en/$(LC_CATEGORY) \
 				$(DESTDIR)/$(LOCALEDIR)/de/$(LC_CATEGORY)
-			
+
 	@echo Copying lib files to $(DESTDIR)/$(DATADIR):
 	@cp -Rp lib/* $(DESTDIR)/$(LIBDIR)/
 	@echo Copying share files to $(DESTDIR)/$(DATADIR):
 	@cp -Rp share/* $(DESTDIR)/$(DATADIR)/
-
-	find $(DESTDIR)/$(DATADIR) -type f -exec chmod 644 "{}" \;
-	find $(DESTDIR)/$(LIBDIR) -type f -exec chmod 644 "{}" \;
 
 	install -m 0644 build/locale/en/$(LC_CATEGORY)/yarssr.mo $(DESTDIR)/$(LOCALEDIR)/en/$(LC_CATEGORY)/
 	install -m 0644 build/locale/de/$(LC_CATEGORY)/yarssr.mo $(DESTDIR)/$(LOCALEDIR)/de/$(LC_CATEGORY)/
@@ -47,5 +44,5 @@ uninstall:
 	rm -rf	$(BINDIR)/yarssr \
 		$(LIBDIR) \
 		$(DATADIR)/yarssr
-		
+
 .PHONY: all yarssr clean install uninstall
