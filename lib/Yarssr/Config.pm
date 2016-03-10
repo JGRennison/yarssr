@@ -34,10 +34,10 @@ sub load_config {
 		online	 => 1,
 		startonline => 1,
 	};
-	
+
 	if (! -e $configdir)
 	{
-		mkdir $configdir 
+		mkdir $configdir
 			or warn "Failed to make config directory: $!\n";
 	}
 	if (! -e $icondir)
@@ -46,18 +46,18 @@ sub load_config {
 			or warn "Failed to make icons directory: $!\n";
 	}
 	if (! -e $statedir) {
-	    mkdir $statedir
-	    	or warn "Failed to make state directory: $!\n";
+		mkdir $statedir
+			or warn "Failed to make state directory: $!\n";
 	}
 	if (-e $config) {
 		open (CONFIG,"<",$config)
 			or warn "Failed to open config file for reading: $!\n";
 		while(<CONFIG>)
 		{
-			
+
 			chomp;
-			
-			if (/^feed=(.*);(.*);(\d)(?:;(.*):(.*))?/) 
+
+			if (/^feed=(.*);(.*);(\d)(?:;(.*):(.*))?/)
 			{
 				my $feed = Yarssr::Feed->new(
 					url	=> $1,
@@ -81,7 +81,7 @@ sub load_config {
 			elsif (/^browser=(.*)/)
 			{
 				$return->{browser} = $1;
-			}		
+			}
 			elsif (/^usegnome=(\d)/)
 			{
 				$return->{usegnome} = $1;
@@ -96,12 +96,12 @@ sub load_config {
 	}
 
 	Yarssr->log_debug(_("Successfully loaded config"));
-	return $return; 
+	return $return;
 }
 
 sub write_config
 {
-     Yarssr->log_debug(_("Writing config"));
+	 Yarssr->log_debug(_("Writing config"));
 	open (CONFIG,">",$config)
 		or warn "Failed to open config file for writing: $!\n";
 	print CONFIG "interval=".$options->{'interval'}."\n";
@@ -128,15 +128,15 @@ sub write_state
 {
 	my (undef,$feed) = @_;
 
-	
-    if (! -e $statedir)
+
+	if (! -e $statedir)
 	{
 		mkdir $statedir
 		or warn "Failed to make statefile directory: $!\n";
 	}
-	
+
 	Yarssr->log_debug(_("Writing state for {feed}",feed => $feed->get_title));
-	
+
 	my $rss = new XML::RSS (version => '1.0');
 	$rss->channel(
 		title	=> $feed->get_title,
@@ -144,8 +144,8 @@ sub write_state
 	);
 	my $count = 0;
 	for my $item ($feed->get_items_array) {
-	    # Limit number of items per feed to save
-	    last if $count++ >= 100;
+		# Limit number of items per feed to save
+		last if $count++ >= 100;
 		my $status = 1;
 		$status = 2 if ( $item->get_status > 1);
 
@@ -160,7 +160,7 @@ sub write_state
 	open RSS,">:utf8",$statedir.$feed->get_title.".xml";
 	print RSS $rss->as_string or die $!;
 	close RSS;
-	
+
 	return 0;
 }
 
@@ -214,7 +214,7 @@ sub set_interval
 	if ($options->{online}) {
 		Glib::Source->remove($timer) if $timer;
 		$timer = Glib::Timeout->add($interval * 60_000,
-		    sub{ Yarssr->download_all; Yarssr::GUI->redraw_menu; 1; });
+			sub{ Yarssr->download_all; Yarssr::GUI->redraw_menu; 1; });
 	}
 }
 
@@ -232,64 +232,64 @@ sub set_usegnome
 
 sub process
 {
-    my $class = shift;
-    my ($new_interval,$new_maxfeeds,$new_browser,
+	my $class = shift;
+	my ($new_interval,$new_maxfeeds,$new_browser,
 		$new_usegnome,$newfeedlist,$online) = @_;
-    my $rebuild = 0;
+	my $rebuild = 0;
 
-    $options->{'browser'} = $new_browser;
-    $options->{'usegnome'} = $new_usegnome;
-	
+	$options->{'browser'} = $new_browser;
+	$options->{'usegnome'} = $new_usegnome;
+
 	if ($online) {
 		$options->{'startonline'} = 1;
 	}
 	else {
 		$options->{'startonline'} = 0;
 	}
-	
+
 	if ($new_interval != $options->{'interval'}) {
-    	set_interval(undef,$new_interval);
+		set_interval(undef,$new_interval);
 	}
 
-    for my $url (keys %{$newfeedlist}) {
-	
+	for my $url (keys %{$newfeedlist}) {
+
 		my $feed;
-	
+
 		# If this feed doesn't exists add it
 		unless ($feed = Yarssr->get_feed_by_url($url)) {
 			$feed = Yarssr::Feed->new(
-			    url		=> $url,
-			    title	=> $newfeedlist->{$url}[0],
-			    enabled	=> 0,
+				url		=> $url,
+				title	=> $newfeedlist->{$url}[0],
+				enabled	=> 0,
 				username => $newfeedlist->{$url}[2],
 				password => $newfeedlist->{$url}[3],
 			);
 			Yarssr->add_feed($feed);
 		}
-	
+
 		unless ($feed->get_enabled == $newfeedlist->{$url}[1]) {
 			$feed->toggle_enabled if $feed->get_enabled != 3;
 			$feed->update if $feed->get_enabled and $options->{'online'};
 			$rebuild = 1;
 		}
-    }
+	}
 
-    for my $feed (Yarssr->get_feeds_array) {
+	for my $feed (Yarssr->get_feeds_array) {
 		unless (exists $newfeedlist->{$feed->get_url}) {
-		    Yarssr->remove_feed($feed);
-		    $rebuild = 1;
+			Yarssr->remove_feed($feed);
+			$rebuild = 1;
 		}
 	}
 
-    $rebuild = 1 if ($options->{'maxfeeds'} != $new_maxfeeds);
-    $options->{'maxfeeds'} = $new_maxfeeds;
+	$rebuild = 1 if ($options->{'maxfeeds'} != $new_maxfeeds);
+	$options->{'maxfeeds'} = $new_maxfeeds;
 
-    return $rebuild;
+	return $rebuild;
 }
 
 sub quit {
-    write_config();
-    write_states();
+	write_config();
+	write_states();
 }
 
 no strict;
@@ -303,7 +303,7 @@ foreach my $field (qw(browser usegnome interval maxfeeds online startonline)) {
 sub set_online {
 	my $class = shift;
 	my $bool = shift;
-	
+
 	$options->{online} = $bool;
 
 	if ($bool) {

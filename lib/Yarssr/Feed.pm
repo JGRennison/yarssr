@@ -23,11 +23,11 @@ sub new {
 	# 2 = parsing error
 
 	$self->{'error'} = 0;
-	
+
 	bless $self, $class;
 
 	$self->{'icon'} = Yarssr::FeedIcon->new($self);
-	
+
 	return $self;
 }
 
@@ -39,7 +39,7 @@ sub get_items_array {
 sub add_item {
 	my $self = shift;
 	my $item = shift;
-	
+
 	ref $item eq 'Yarssr::Item' or die;
 
 	push @{$self->{'items'}}, $item;
@@ -49,7 +49,7 @@ sub add_item {
 sub unshift_item {
 	my $self = shift;
 	my $item = shift;
-	
+
 	ref $item eq 'Yarssr::Item' or die;
 
 	unshift @{$self->{'items'}}, $item;
@@ -69,13 +69,13 @@ foreach my $field (qw(title date url interval menu username password)) {
 }
 
 sub get_icon {
-    my $self = shift;
-    return $self->{'icon'}->get_pixbuf;
+	my $self = shift;
+	return $self->{'icon'}->get_pixbuf;
 }
 
 sub update_icon {
-    my $self = shift;
-    $self->{'icon'}->update;
+	my $self = shift;
+	$self->{'icon'}->update;
 }
 
 sub enable
@@ -94,33 +94,33 @@ sub disable
 
 sub enable_and_flag
 {
-    my $self = shift;
-    $self->{'enabled'} = 3;
-    return 1;
+	my $self = shift;
+	$self->{'enabled'} = 3;
+	return 1;
 }
 
 sub toggle_enabled
 {
-    my $self = shift;
-    if ($self->{'enabled'}) {
-	$self->disable;
-    }
-    else {
-	$self->enable;
-    }
+	my $self = shift;
+	if ($self->{'enabled'}) {
+		$self->disable;
+	}
+	else {
+		$self->enable;
+	}
 }
 
 sub new_menu {
-    my $self = shift;
-    $self->{'menu'} = undef;
-    $self->{'menu'} = Gtk2::Menu->new;
+	my $self = shift;
+	$self->{'menu'} = undef;
+	$self->{'menu'} = Gtk2::Menu->new;
 }
 
 sub check_url {
 	my $self = shift;
 	my $url = shift;
 	for (@{$self->{'items'}}) {
-			return 1 if $_->get_url eq $url;
+		return 1 if $_->get_url eq $url;
 	}
 	return 0;
 }
@@ -138,27 +138,27 @@ sub update
 
 	# Set new items as unread
 	#for ($self->get_items_array) {
-	#    $_->set_status(2) if $_->get_status > 2;
+	#	$_->set_status(2) if $_->get_status > 2;
 	#}
-	
+
 	#$self->reset_newitems();
 	$self->enable if ($self->get_enabled == 3);
 	my $content = Yarssr::Fetcher->fetch_feed($self);
 
 	# If download is successful
-	if ($content) { 
+	if ($content) {
 		$self->{status} = 0;
-		
+
 		unless (@items = Yarssr::Parser->parse($self,$content)) {
 			$self->{status} = 2;
 		}
-		
+
 		for my $item (reverse @items) {
-		    Yarssr::GUI->gui_update;
+			Yarssr::GUI->gui_update;
 			unless ($self->get_item_by_id($item->get_id)) {
-			    $self->unshift_item($item);
-			    $item->set_parent($self);
-			 }
+				$self->unshift_item($item);
+				$item->set_parent($self);
+			}
 		}
 		return 1;
 	}
@@ -174,32 +174,32 @@ sub get_status {
 }
 
 sub get_item_by_id {
-    my $self = shift;
-    my $id = shift;
-    for (@{$self->{'items'}}) {
-	return $_ if $_->get_id eq $id;
-    }
-    return 0;
+	my $self = shift;
+	my $id = shift;
+	for (@{$self->{'items'}}) {
+		return $_ if $_->get_id eq $id;
+	}
+	return 0;
 }
 
 sub add_newitem {
-    my $self = shift;
-    return ++$self->{'newitems'};
+	my $self = shift;
+	return ++$self->{'newitems'};
 }
 
 sub subtract_newitem {
-    my $self = shift;
-    return --$self->{'newitems'};
+	my $self = shift;
+	return --$self->{'newitems'};
 }
 
 sub get_newitems {
-    my $self = shift;
-    return $self->{'newitems'};
+	my $self = shift;
+	return $self->{'newitems'};
 }
 
 sub reset_newitems {
-    my $self = shift;
-    $self->{'newitems'} = 0;
+	my $self = shift;
+	$self->{'newitems'} = 0;
 }
 
 sub clear_newitems {

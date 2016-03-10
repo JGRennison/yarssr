@@ -42,38 +42,38 @@ sub init {
 	Gtk2->init;
 
 	my $imagedir = $Yarssr::PREFIX."/share/yarssr/pixmaps/";
-	
+
 	$paper_grey_pixbuf = Gtk2::Gdk::Pixbuf->new_from_file(
-	    $imagedir."paper_grey.xpm");
+		$imagedir."paper_grey.xpm");
 	$paper_red_pixbuf = Gtk2::Gdk::Pixbuf->new_from_file(
-	    $imagedir."paper_red.xpm");
+		$imagedir."paper_red.xpm");
 	$paper_green_pixbuf = Gtk2::Gdk::Pixbuf->new_from_file(
-	    $imagedir."paper_green.xpm");
+		$imagedir."paper_green.xpm");
 	$dot_full_red_pixbuf = Gtk2::Gdk::Pixbuf->new_from_file(
-	    $imagedir."full_red.xpm");
+		$imagedir."full_red.xpm");
 	$dot_hollow_red_pixbuf = Gtk2::Gdk::Pixbuf->new_from_file(
-	    $imagedir."hollow_red.xpm");
+		$imagedir."hollow_red.xpm");
 	$blank_pixbuf = Gtk2::Gdk::Pixbuf->new_from_file(
-	    $imagedir."blank.xpm");
+		$imagedir."blank.xpm");
 	$tray_image = Gtk2::Image->new_from_pixbuf(
-	    $paper_grey_pixbuf);
+		$paper_grey_pixbuf);
 
 	$tooltips = Gtk2::Tooltips->new;
 
 	# Create tray inon
 	my $tray = Gtk2::TrayIcon->new("rss");
 	$eventbox = Gtk2::EventBox->new;
-	
+
 	$eventbox->add($tray_image);
-	set_icon_active();	
+	set_icon_active();
 
 	$tray->add($eventbox);
 	$tray->show_all;
-	Gtk2->main_iteration while Gtk2->events_pending;	
-	
+	Gtk2->main_iteration while Gtk2->events_pending;
+
 	$gld = Gtk2::GladeXML->new($Yarssr::PREFIX.'/share/yarssr/yarssr.glade');
 	$gld->signal_autoconnect_from_package('main');
-	
+
 	$prefs_window = $gld->get_widget('window_prefs');
 	$prefs_window->signal_connect('delete-event'=>\&delete_event);
 
@@ -84,10 +84,10 @@ sub init {
 	$feedinfo_dialog = $gld->get_widget('feed_dialog');
 	$feedinfo_dialog->set_transient_for($prefs_window);
 	$feedinfo_dialog->signal_connect('delete-event'=>\&delete_event);
-	
+
 	$treeview = Gtk2::TreeView->new;
 	$treeview->set_rules_hint(1);
-	
+
 	my $icon = Gtk2::TreeViewColumn->new_with_attributes(
 		'',Gtk2::CellRendererPixbuf->new,pixbuf => 0);
 	my $title = Gtk2::TreeViewColumn->new_with_attributes(
@@ -116,9 +116,9 @@ sub init {
 };
 
 sub delete_event {
-    $_[0]->hide;
-    feedinfo_dialog_clear();
-    return 1;
+	$_[0]->hide;
+	feedinfo_dialog_clear();
+	return 1;
 }
 
 sub set_icon_active {
@@ -130,19 +130,19 @@ sub set_icon_active {
 }
 
 sub set_icon_inactive {
-    $eventbox->signal_handlers_disconnect_by_func(\&ignore_button_press);
-    $eventbox->signal_connect("button-press-event", \&handle_button_press);
-    
-    my $newitems = Yarssr->get_total_newitems;
+	$eventbox->signal_handlers_disconnect_by_func(\&ignore_button_press);
+	$eventbox->signal_connect("button-press-event", \&handle_button_press);
 
-    if ($newitems) {
+	my $newitems = Yarssr->get_total_newitems;
+
+	if ($newitems) {
 		$tray_image->set_from_pixbuf($paper_green_pixbuf);
-    } else {
+	} else {
 		$tray_image->set_from_pixbuf($paper_grey_pixbuf);
-    }
-    
-    set_tooltip($newitems." new links since last update");
-    gui_update();
+	}
+
+	set_tooltip($newitems." new links since last update");
+	gui_update();
 }
 
 sub launch_url {
@@ -190,7 +190,7 @@ sub prefs_show
 
 	$treeview->set_model($liststore);
 
-    for (Yarssr->get_feeds_array) {
+	for (Yarssr->get_feeds_array) {
 
 		my $pixbuf = undef;
 		if ($_->get_status) {
@@ -208,22 +208,22 @@ sub prefs_show
 			4	=> defined $_->get_username ? $_->get_username : 0,
 			5	=> defined $_->get_password ? $_->get_password : 0,
 		);
-    }
-    
-    $gld->get_widget('interval_entry')->set_text(Yarssr::Config->get_interval);
-    $gld->get_widget('headings_entry')->set_text(Yarssr::Config->get_maxfeeds);
-    $gld->get_widget('browser_entry')->set_text(Yarssr::Config->get_browser);
-    $gld->get_widget('browser_entry')->set_sensitive(
+	}
+
+	$gld->get_widget('interval_entry')->set_text(Yarssr::Config->get_interval);
+	$gld->get_widget('headings_entry')->set_text(Yarssr::Config->get_maxfeeds);
+	$gld->get_widget('browser_entry')->set_text(Yarssr::Config->get_browser);
+	$gld->get_widget('browser_entry')->set_sensitive(
 		!Yarssr::Config->get_usegnome);
-    $gld->get_widget('use_default_browser_checkbox')->set_active(
+	$gld->get_widget('use_default_browser_checkbox')->set_active(
 		Yarssr::Config->get_usegnome);
 	$gld->get_widget('start_online_checkbutton')->set_active(
 		Yarssr::Config->get_startonline);
 
-    $gld->get_widget('pref_ok_button')->grab_focus;
-	
+	$gld->get_widget('pref_ok_button')->grab_focus;
 
-    $prefs_window->show_all;
+
+	$prefs_window->show_all;
 }
 
 sub item_toggled {
@@ -232,7 +232,7 @@ sub item_toggled {
 	my $path = Gtk2::TreePath->new_from_string($path_str);
 
 	my $column = $cell->get_data('column');
-	
+
 	my $iter = $liststore->get_iter($path);
 	my $toggled_item = $liststore->get($iter,$column);
 
@@ -259,36 +259,36 @@ sub on_pref_ok_button_clicked
 		\&on_pref_cancel_button_clicked);
 
 	$prefs_window->hide;
-	Gtk2->main_iteration while Gtk2->events_pending;	
+	Gtk2->main_iteration while Gtk2->events_pending;
 
 	my $interval = $gld->get_widget('interval_entry')->get_text;
 	my $maxfeeds = $gld->get_widget('headings_entry')->get_text;
 	my $browser = $gld->get_widget('browser_entry')->get_text;
 	my $online = $gld->get_widget('start_online_checkbutton')->get_active;
 	my $usegnome;
-	
+
 	if ($gld->get_widget('use_default_browser_checkbox')->get_active) {
-	    $usegnome = 1;
+		$usegnome = 1;
 	}
 	else {
-	    $usegnome = 0;
+		$usegnome = 0;
 	}
 
 	my $newfeedlist;
-	
+
 	$liststore->foreach( sub {
 		my ($model,$path,$iter) = @_;
 		my (undef,$title,$enabled,$url,$user,$pass) = $liststore->get($iter);
 		$newfeedlist->{$url} = [ $title,$enabled,$user,$pass ];
 		return 0;
 	});
-			
+
 
 	set_icon_active();
 	redraw_menu() if Yarssr::Config->process(
 		$interval,$maxfeeds,$browser,$usegnome,$newfeedlist,$online);
-    Yarssr::Config->write_config;
-    set_icon_inactive();
+	Yarssr::Config->write_config;
+	set_icon_inactive();
 
 	$treeview->set_model(undef);
 }
@@ -312,62 +312,62 @@ sub on_use_default_browser_checkbox_toggled
 
 sub on_add_button_clicked
 {
-    my $ok_button = $gld->get_widget('feedinfo_ok_button');
+	my $ok_button = $gld->get_widget('feedinfo_ok_button');
 	$ok_button->signal_handlers_disconnect_by_func(\&properties_change);
-	
+
 	$ok_button->signal_connect('clicked',\&feedinfo_add);
-	
-    $feedinfo_dialog->show_all;
+
+	$feedinfo_dialog->show_all;
 }
 
 sub on_remove_button_clicked {
 	my @rows = $treeview->get_selection->get_selected_rows;
 	my $liststore = $treeview->get_model;
-    for (reverse @rows) {
+	for (reverse @rows) {
 		my $iter = $liststore->get_iter($_);
 		$liststore->remove($iter);
-    }
+	}
 }
 
 sub feedinfo_add {
-    my $title = $gld->get_widget('feedinfo_name');
-    my $url = $gld->get_widget('feedinfo_address');
-    my $username = $gld->get_widget('feedinfo_username');
-    my $password = $gld->get_widget('feedinfo_password');
+	my $title = $gld->get_widget('feedinfo_name');
+	my $url = $gld->get_widget('feedinfo_address');
+	my $username = $gld->get_widget('feedinfo_username');
+	my $password = $gld->get_widget('feedinfo_password');
 	my $ok_button = $gld->get_widget('feedinfo_ok_button');
 	my $liststore = $treeview->get_model;
 
 	$ok_button->signal_handlers_disconnect_by_func(\&feedinfo_add);
-    
-    unless (Yarssr->get_feed_by_url($url->get_text) or 
- 	   Yarssr->get_feed_by_title($title->get_text)) {
-	   my $iter = $liststore->append;
-	   $liststore->set($iter,
-		   0	=> undef,
-		   1	=> $title->get_text,
-		   2	=> 1,
-		   3	=> $url->get_text,
-		   4	=> $username->get_text,
-		   5	=> $password->get_text,
-	   );
-    }
 
-    feedinfo_dialog_clear();
-    $feedinfo_dialog->hide;
+	unless (Yarssr->get_feed_by_url($url->get_text) or
+			Yarssr->get_feed_by_title($title->get_text)) {
+		my $iter = $liststore->append;
+		$liststore->set($iter,
+			0	=> undef,
+			1	=> $title->get_text,
+			2	=> 1,
+			3	=> $url->get_text,
+			4	=> $username->get_text,
+			5	=> $password->get_text,
+		);
+	}
+
+	feedinfo_dialog_clear();
+	$feedinfo_dialog->hide;
 }
 
 sub feedinfo_dialog_clear {
-    $gld->get_widget('feedinfo_name')->set_text('');
-    $gld->get_widget('feedinfo_address')->set_text('');
-    $gld->get_widget('feedinfo_username')->set_text('');
-    $gld->get_widget('feedinfo_password')->set_text('');
+	$gld->get_widget('feedinfo_name')->set_text('');
+	$gld->get_widget('feedinfo_address')->set_text('');
+	$gld->get_widget('feedinfo_username')->set_text('');
+	$gld->get_widget('feedinfo_password')->set_text('');
 	$gld->get_widget('feedinfo_options')->set_expanded(0);
 }
 
 
 sub on_feedinfo_cancel_button_clicked {
-    feedinfo_dialog_clear();
-    $feedinfo_dialog->hide;
+	feedinfo_dialog_clear();
+	$feedinfo_dialog->hide;
 }
 
 sub redraw_menu {
@@ -375,7 +375,7 @@ sub redraw_menu {
 	Yarssr->log_debug(_("Rebuilding menu"));
 
 	for my $feed (Yarssr->get_feeds_array) {
-		Gtk2->main_iteration while Gtk2->events_pending;	
+		Gtk2->main_iteration while Gtk2->events_pending;
 		create_feed_menu($feed) if $feed->get_enabled;
 	}
 	create_root_menu();
@@ -389,7 +389,7 @@ sub create_root_menu {
 	$clear_new->set_image(Gtk2::Image->new_from_stock('gtk-clear','menu'));
 	$refresh->signal_connect('activate',sub {
 		$menu->popdown;
-		Gtk2->main_iteration while Gtk2->events_pending;	
+		Gtk2->main_iteration while Gtk2->events_pending;
 		Yarssr->download_all;
 	});
 	$clear_new->signal_connect('activate',sub {
@@ -399,7 +399,7 @@ sub create_root_menu {
 	$menu->append($refresh);
 	$menu->append($clear_new);
 	$menu->append(Gtk2::SeparatorMenuItem->new);
-	
+
 	for my $feed (Yarssr->get_feeds_array) {
 		if ($feed->get_enabled) {
 		   	my $title = $feed->get_title;
@@ -413,7 +413,7 @@ sub create_root_menu {
 			elsif (my $icon = $feed->get_icon) {
 				my $image = Gtk2::Image->new_from_pixbuf($icon);
 				$menuitem->set_image($image);
-		    }
+			}
 
 			$menuitem->set_submenu($feed->get_menu);
 			$menu->append($menuitem);
@@ -424,10 +424,10 @@ sub create_root_menu {
 }
 
 sub create_prefs_menu {
-    $pref_menu = Gtk2::Menu->new;
-    my $quit = Gtk2::ImageMenuItem->new_from_stock('gtk-quit');
-    my $prefs = Gtk2::ImageMenuItem->new_from_stock('gtk-preferences');
-    my $about = Gtk2::ImageMenuItem->new(_("_About"));
+	$pref_menu = Gtk2::Menu->new;
+	my $quit = Gtk2::ImageMenuItem->new_from_stock('gtk-quit');
+	my $prefs = Gtk2::ImageMenuItem->new_from_stock('gtk-preferences');
+	my $about = Gtk2::ImageMenuItem->new(_("_About"));
 
 	my $online;
 	my $imageroot = $Yarssr::PREFIX."/share/yarssr/pixmaps/";
@@ -438,7 +438,7 @@ sub create_prefs_menu {
 		$online->set_image($image);
 		$online->signal_connect('activate',
 			sub { Yarssr::Config->set_online(0); create_prefs_menu(); });
-		
+
 	}
 	else {
 		$online = Gtk2::ImageMenuItem->new(_("Go _Online"));
@@ -447,20 +447,20 @@ sub create_prefs_menu {
 		$online->signal_connect('activate',
 			sub { Yarssr::Config->set_online(1); create_prefs_menu(); });
 	}
-	
-    $about->set_image(Gtk2::Image->new_from_stock('gnome-stock-about','menu'));
-    $about->signal_connect('activate',\&on_about_button_clicked);
-    $prefs->signal_connect('activate',\&prefs_show);
-    $quit->signal_connect('activate',sub { 
-	    Yarssr::Config->write_config;
-	    Yarssr::Config->write_states;
-	    exit;});
-    $pref_menu->append($online);
-    $pref_menu->append($prefs);
-    $pref_menu->append($about);
-    $pref_menu->append($quit);
-    $pref_menu->show_all;
-    return $prefs_menu;
+
+	$about->set_image(Gtk2::Image->new_from_stock('gnome-stock-about','menu'));
+	$about->signal_connect('activate',\&on_about_button_clicked);
+	$prefs->signal_connect('activate',\&prefs_show);
+	$quit->signal_connect('activate',sub {
+		Yarssr::Config->write_config;
+		Yarssr::Config->write_states;
+		exit;});
+	$pref_menu->append($online);
+	$pref_menu->append($prefs);
+	$pref_menu->append($about);
+	$pref_menu->append($quit);
+	$pref_menu->show_all;
+	return $prefs_menu;
 }
 
 sub create_feed_menu {
@@ -487,37 +487,37 @@ sub create_feed_menu {
 			$title .= "\n";
 			$title .= $_;
 		}
-		
+
 		my $menuitem = Gtk2::ImageMenuItem->new($title);
 		my $status = $item->get_status;
-		
+
 		if ($status == 4 or $status == 3) {
 			$image = Gtk2::Image->new_from_pixbuf(
-			    $dot_full_red_pixbuf);
+				$dot_full_red_pixbuf);
 			$menuitem->set_image($image);
 			$item->set_status(3);
 			$feed->add_newitem;
 		}
 		elsif ($status == 2) {
-		    $image = Gtk2::Image->new_from_pixbuf(
+			$image = Gtk2::Image->new_from_pixbuf(
 			$dot_hollow_red_pixbuf);
-		    $menuitem->set_image($image);
+			$menuitem->set_image($image);
 		}
 		else {
 			$image = Gtk2::Image->new_from_pixbuf(
-			    $blank_pixbuf);
+				$blank_pixbuf);
 			$item->set_status(1);
 			$menuitem->set_image($image);
 		}
 		$menuitem->signal_connect('activate',sub {
 			menuitem_clicked($menuitem,$item);
-		    });
+			});
 		$feed->get_menu->append($menuitem);
 	}
 	$feed->get_menu->append(Gtk2::SeparatorMenuItem->new);
 	my $update = Gtk2::ImageMenuItem->new(_("Update this feed"));
 	$update->set_image(Gtk2::Image->new_from_stock('gtk-refresh','menu'));
-	$update->signal_connect('activate',sub{ 
+	$update->signal_connect('activate',sub{
 			set_icon_active();
 			Yarssr->download_feed($feed);
 			redraw_menu();
@@ -526,7 +526,7 @@ sub create_feed_menu {
 	$feed->get_menu->append($update);
 	my $unmark = Gtk2::ImageMenuItem->new(_("Unmark new"));
 	$unmark->set_image(Gtk2::Image->new_from_stock('gtk-clear','menu'));
-	$unmark->signal_connect('activate',sub{ 
+	$unmark->signal_connect('activate',sub{
 			set_icon_active();
 			Yarssr->clear_newitems_in_feed($feed);
 			redraw_menu();
@@ -534,12 +534,12 @@ sub create_feed_menu {
 		});
 	$feed->get_menu->append($unmark);
 	$feed->get_menu->show_all;
-}	
+}
 
 sub menuitem_clicked {
 	my $menuitem = shift;
 	my $item = shift;
-	
+
 	launch_url($item->get_url);
 
 	my $feed = $item->get_parent;
@@ -550,18 +550,18 @@ sub menuitem_clicked {
 				Yarssr::Config->write_state($feed);
 			});
 	}
-	
+
 	my $newitems;
-	
+
 	if ($status > 2) {
-	    $newitesms = $feed->subtract_newitem();
+		$newitesms = $feed->subtract_newitem();
 	}
 
 	$item->set_status(1);
 	redraw_menu() unless $newitems;
-	
+
 	set_tooltip(Yarssr->get_total_newitems." new links since last update");
-	
+
 	my $image = Gtk2::Image->new_from_pixbuf($blank_pixbuf);
 	$menuitem->set_image($image);
 }
@@ -572,111 +572,111 @@ sub get_menu {
 
 sub ignore_button_press {
 	Yarssr->log_debug("Menu is disabled while updating");
-    return 1;
+	return 1;
 }
 
 sub handle_button_press {
-    my $widget = shift;
-    my $event = shift;
-    
-    $menu_x = $event->x_root - $event->x;
-    $menu_y = $event->y_root - $event->y;
-    
-    if ($event->button == 1) {
-	$menu->popup(undef,undef,\&position_menu,0,$event->button,$event->time)
-    }
-    else {
-	$pref_menu->popup(undef,undef,\&position_menu,0,$event->button,$event->time);
-    }
+	my $widget = shift;
+	my $event = shift;
+
+	$menu_x = $event->x_root - $event->x;
+	$menu_y = $event->y_root - $event->y;
+
+	if ($event->button == 1) {
+		$menu->popup(undef,undef,\&position_menu,0,$event->button,$event->time)
+	}
+	else {
+		$pref_menu->popup(undef,undef,\&position_menu,0,$event->button,$event->time);
+	}
 }
 
 sub position_menu {
 
-    # Shamlessly stolen from Muine :-)
-    
-    my $x = $menu_x;
-    my $y = $menu_y;
+	# Shamlessly stolen from Muine :-)
 
-    my $monitor = $menu->get_screen->get_monitor_at_point($x,$y);
-    my $rect = $menu->get_screen->get_monitor_geometry($monitor);
+	my $x = $menu_x;
+	my $y = $menu_y;
 
-    my $space_above = $y - $rect->y;
-    my $space_below = $rect->y + $rect->height - $y;
+	my $monitor = $menu->get_screen->get_monitor_at_point($x,$y);
+	my $rect = $menu->get_screen->get_monitor_geometry($monitor);
 
-    my $requisition = $menu->size_request();
+	my $space_above = $y - $rect->y;
+	my $space_below = $rect->y + $rect->height - $y;
 
-    if ($requisition->height <= $space_above ||
+	my $requisition = $menu->size_request();
+
+	if ($requisition->height <= $space_above ||
 	$requisition->height <= $space_below) {
-	
+
 	if ($requisition->height <= $space_below) {
-	    $y = $y + $eventbox->allocation->height; 
-	}
-	
-	else {
-	    $y = $y - $requisition->height;
-	}
-	
-    }
-    
-    elsif ($requisition->height > $space_below and
-	$requisition->height > $space_above) {
-	
-	if ($space_below >= $space_above) {
-	    $y = $rect->y + $rect->height - $requisition->height;
+		$y = $y + $eventbox->allocation->height;
 	}
 
 	else {
-	    $y = $rect->y;
+		$y = $y - $requisition->height;
 	}
-    }
-    
-    else {
+
+	}
+
+	elsif ($requisition->height > $space_below and
+	$requisition->height > $space_above) {
+
+	if ($space_below >= $space_above) {
+		$y = $rect->y + $rect->height - $requisition->height;
+	}
+
+	else {
+		$y = $rect->y;
+	}
+	}
+
+	else {
 	$y = $rect->y;
-    }
-    return ($x,$y,1);
+	}
+	return ($x,$y,1);
 }
 
 sub gui_update {
-    Gtk2->main_iteration while Gtk2->events_pending;	
+	Gtk2->main_iteration while Gtk2->events_pending;
 }
 
 sub on_about_button_clicked {
-    my $logo = $paper_grey_pixbuf->scale_simple(64,64,'tiles');
-    my $author = "$Yarssr::AUTHOR\n\n Patches from:\n";
-    $author .= "\t$_\n" for @Yarssr::COAUTHORS;
+	my $logo = $paper_grey_pixbuf->scale_simple(64,64,'tiles');
+	my $author = "$Yarssr::AUTHOR\n\n Patches from:\n";
+	$author .= "\t$_\n" for @Yarssr::COAUTHORS;
 	$author .= "\n$_" for @Yarssr::TESTERS;
-    my $about = Gnome2::About->new(
+	my $about = Gnome2::About->new(
 		$Yarssr::NAME,$Yarssr::VERSION,$Yarssr::LICENSE,
 		$Yarssr::URL,$author,undef,'German Translation: Joachim Breitner <mail@joachim-breitner.de>',$logo);
-    $about->show;
+	$about->show;
 }
 
 sub on_properties_button_clicked {
 	my @paths = $treeview->get_selection->get_selected_rows;
-    return unless @paths;
+	return unless @paths;
 
 	my $liststore = $treeview->get_model;
 
-    my $iter = $liststore->get_iter($paths[0]);
+	my $iter = $liststore->get_iter($paths[0]);
 	my @row = $liststore->get($iter);
-    
-    $gld->get_widget('feedinfo_name')->set_text($row[1]);
-    $gld->get_widget('feedinfo_address')->set_text($row[3]);
-    $gld->get_widget('feedinfo_username')->set_text($row[4]);
-    $gld->get_widget('feedinfo_password')->set_text($row[5]);
+
+	$gld->get_widget('feedinfo_name')->set_text($row[1]);
+	$gld->get_widget('feedinfo_address')->set_text($row[3]);
+	$gld->get_widget('feedinfo_username')->set_text($row[4]);
+	$gld->get_widget('feedinfo_password')->set_text($row[5]);
 
 
 	my $ok_button = $gld->get_widget('feedinfo_ok_button');
 
-    $ok_button->signal_handlers_disconnect_by_func(\&feedinfo_add);
+	$ok_button->signal_handlers_disconnect_by_func(\&feedinfo_add);
 
 	$ok_button->signal_connect('clicked', \&properties_change,$paths[0]);
 
-    $feedinfo_dialog->show_all;
+	$feedinfo_dialog->show_all;
 }
 
 sub properties_change {
-    my (undef,$path) = @_;
+	my (undef,$path) = @_;
 
 	my $liststore = $treeview->get_model;
 	my $iter = $liststore->get_iter($path);
@@ -684,15 +684,15 @@ sub properties_change {
 
 	my $feed = Yarssr->get_feed_by_url($row[3]);
 	my $ok_button = $gld->get_widget('feedinfo_ok_button');
-	
+
 	$ok_button->signal_handlers_disconnect_by_func(\&properties_change);
 	$feedinfo_dialog->hide;
 
-    my $new_title = $gld->get_widget('feedinfo_name')->get_text;
-    my $new_url = $gld->get_widget('feedinfo_address')->get_text;
-    my $new_username = $gld->get_widget('feedinfo_username')->get_text;
-    my $new_password = $gld->get_widget('feedinfo_password')->get_text;
-    
+	my $new_title = $gld->get_widget('feedinfo_name')->get_text;
+	my $new_url = $gld->get_widget('feedinfo_address')->get_text;
+	my $new_username = $gld->get_widget('feedinfo_username')->get_text;
+	my $new_password = $gld->get_widget('feedinfo_password')->get_text;
+
 	$liststore->set($iter,
 		1	=> $new_title,
 		3	=> $new_url,
@@ -700,10 +700,10 @@ sub properties_change {
 		5	=> $new_password,
 	);
 
-    # Need to figure out some way to apply this only when
-    # the user clicks Ok.
+	# Need to figure out some way to apply this only when
+	# the user clicks Ok.
 	if ($feed) {
-	    $feed->set_title($new_title);
+		$feed->set_title($new_title);
 		$feed->set_url($new_url);
 		$feed->set_username($new_username);
 		$feed->set_password($new_password);
@@ -716,18 +716,18 @@ sub properties_change {
 sub enabled_header_clicked {
 	my $liststore = $treeview->get_model;
 	my $total = $liststore->iter_n_children;
-    my $enabled = 0;
+	my $enabled = 0;
 	$liststore->foreach(sub{$enabled+=$_[0]->get($_[2], 2);0;});
-    
-    my $bool = 1;
-    $bool = 0 if $total == $enabled;
+
+	my $bool = 1;
+	$bool = 0 if $total == $enabled;
 
 	$liststore->foreach(sub{$_[0]->set($_[2],2,$bool);0;});
 }
 
 sub set_tooltip {
-    my $text = shift;
-    $tooltips->set_tip($eventbox,$text);
+	my $text = shift;
+	$tooltips->set_tip($eventbox,$text);
 }
 
 sub quit {
