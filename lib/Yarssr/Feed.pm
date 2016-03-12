@@ -59,7 +59,7 @@ sub unshift_item {
 	#reverse(sort {$a->get_date <=> $b->get_date} @{$self->{'items'}});
 }
 
-foreach my $field (qw(title date url interval menu username password)) {
+foreach my $field (qw(title date url interval menu username password last_modified)) {
 	*{"get_$field"} = sub {
 		my $self = shift;
 		defined $self->{$field} ? return $self->{$field} : return "";
@@ -170,13 +170,15 @@ sub update
 					$item->set_parent($self);
 				}
 			}
+			$self->set_last_modified($info->{last_modified});
 			$self->{downloading} = 0;
 			$cv->send(1);
 		} else {
 			# If download fails
-			$self->{status} = 1;
+			my $ok = $info->{not_modified};
+			$self->{status} = $ok ? 0 : 1;
 			$self->{downloading} = 0;
-			$cv->send(0);
+			$cv->send($ok ? 1 : 0);
 		}
 	});
 	return $cv;

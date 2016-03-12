@@ -17,7 +17,7 @@ sub fetch_feed {
 
 	Yarssr->log_debug("Downloading " . $feed->get_title . ", " . $feed->get_url);
 
-	return _download($feed->get_url, $login);
+	return _download($feed->get_url, $login, $feed->get_last_modified);
 }
 
 sub fetch_icon {
@@ -48,7 +48,7 @@ sub fetch_opml {
 }
 
 sub _download {
-	my ($url, $login) = @_;
+	my ($url, $login, $last_modified) = @_;
 	caller eq __PACKAGE__ or die;
 
 	my $cv = AnyEvent::condvar;
@@ -58,16 +58,23 @@ sub _download {
 		$headers{'Authorization'} = "Basic " . MIME::Base64::encode($login->[0] . ':' . $login->[1], '');
 	}
 
+	if ($last_modified) {
+		$headers{'If-Modified-Since'} = $last_modified;
+	}
+
 	http_get($url,
 		headers => \%headers,
 		timeout => 60,
 		sub {
 			my ($data, $headers) = @_;
 			Yarssr->log_debug("Fetched: '$url', got status: " . $headers->{Status} . ": " . $headers->{Reason} .
-					", type: " . $headers->{"content-type"} . ", " . length $data . " bytes");
+					", type: " . $headers->{"content-type"} . ", length: " . length $data . " bytes");
+			my $ok = $headers->{Status} == 200;
 			$cv->send({
-				content => $headers->{Status} == 200 ? $data : undef,
+				content => $ok ? $data : undef,
 				type => $headers->{"content-type"},
+				last_modified => $ok ? $headers->{"last-modified"} : $last_modified,
+				not_modified => $headers->{Status} == 304,
 			});
 		}
 	);

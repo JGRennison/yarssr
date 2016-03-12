@@ -139,9 +139,13 @@ sub write_state
 	Yarssr->log_debug(_("Writing state for {feed}",feed => $feed->get_title));
 
 	my $rss = new XML::RSS (version => '1.0');
+	$rss->add_module(prefix => 'yarssr', uri => 'http://yarssr/');
 	$rss->channel(
 		title	=> $feed->get_title,
 		link	=> $feed->get_url,
+		yarssr	=> {
+			last_modified => $feed->get_last_modified,
+		},
 	);
 	my $count = 0;
 	for my $item ($feed->get_items_array) {
@@ -179,8 +183,12 @@ sub load_state
 	if (-e $file) {
 		Yarssr->log_debug(_("Loading state for {feed}",feed => $feed->get_title));
 		my $rss = new XML::RSS;
+		$rss->add_module(prefix => 'yarssr', uri => 'http://yarssr/');
 		eval { $rss->parsefile($file) };
 		return if $@;
+		eval {
+			$feed->set_last_modified($rss->channel()->{yarssr}->{'last_modified'});
+		};
 		for (@{$rss->{'items'}}) {
 			$_->{dc}{description} =~ /read: (\d)$/;
 			my $read = $1;
