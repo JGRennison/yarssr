@@ -14,11 +14,12 @@ use vars qw(
 	$AUTHOR		@CO_AUTHORS	$URL	$LICENSE);
 
 our $NAME		= 'yarssr';
-our $VERSION	= '0.2.2';
+our $VERSION	= '0.3.0~prerelease';
 our $LICENSE	= 'GNU General Public License (GPL)';
-our $URL		= 'http://yarssr.sf.net';
+our $URL		= 'https://github.com/JGRennison/yarssr';
+our $OLDURL		= 'http://yarssr.sf.net';
 our $AUTHOR		= "Lee Aylward";
-our @COAUTHORS	= ( "James Curbo","Dan Leski" );
+our @COAUTHORS	= ( "James Curbo","Dan Leski","Jonathan Rennison" );
 our @TESTERS	= (	"Thanks to Joachim Breitner for testing\n".
 					"and maintaining the Debian package");
 our $debug = 0;

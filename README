@@ -1,6 +1,15 @@
 Yarssr, a RSS reader for the GNOME Tray
-Author: Lee Aylward <lee@laylward.com>
-http://yarssr.sf.net
+Original Author: Lee Aylward <lee@laylward.com>
+
+This is a fork of the original (v0.2.2) from http://yarssr.sf.net with the following changes:
+* Apply patches from Debian up to v0.2.2-9
+* Remove dangerous chmods in make install target.
+* Replace Atom parser with a more correct XML::LibXML implementation, to fix various Atom parsing bugs.
+* Do downloads asynchronously and in parallel using AnyEvent::HTTP instead of using Gnome VFS.
+* Only re-download feeds if they have changed since the last download, using the If-Modified-Since header.
+* Fix favicon downloads uing the wrong URL on HTTPS domains.
+
+URL: https://github.com/JGRennison/yarssr
 
 Perl Module requirements:
 

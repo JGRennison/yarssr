@@ -37,9 +37,9 @@
 
 0.1.9
 	- No more empty child processes left behind by browser fork.
-	
+
 0.2.0
-	- Saves a feeds state, so feeds stay marked as read between 
+	- Saves a feeds state, so feeds stay marked as read between
 	  sessions.
 	- Marks new articles with a solid dot and unread articles
 	  with a hollow dot.
@@ -65,3 +65,12 @@
 	- Fixed bug that was leaving zombie processes after browsers were
 	  closed
 	- il8n support added
+
+0.3.0~prelease
+	- Apply patches from Debian up to v0.2.2-9:
+	  Adjust makefile, German translations, code injection fix, timeout for waitpid, keep new state across update, identify also by title, atom feeds opening.
+	- Remove dangerous chmods in make install target.
+	- Replace Atom parser with a more correct XML::LibXML implementation, to fix various Atom parsing bugs.
+	- Do downloads asynchronously and in parallel using AnyEvent::HTTP instead of using Gnome VFS.
+	- Only re-download feeds if they have changed since the last download, using the If-Modified-Since header.
+	- Fix favicon downloads uing the wrong URL on HTTPS domains.
