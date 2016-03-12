@@ -304,12 +304,12 @@ sub on_pref_ok_button_clicked
 		return 0;
 	});
 
-
-	my $activity_guard = get_icon_activity_blocking_guard();
-	redraw_menu() if Yarssr::Config->process(
+	my $cv = Yarssr::Config->process(
 		$interval,$maxfeeds,$browser,$usegnome,$newfeedlist,$online);
-	Yarssr::Config->write_config;
-	undef $activity_guard;
+	$cv->cb(sub {
+		redraw_menu() if $cv->recv;
+		Yarssr::Config->write_config;
+	});
 
 	$treeview->set_model(undef);
 }

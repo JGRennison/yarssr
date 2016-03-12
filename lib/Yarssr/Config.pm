@@ -3,6 +3,7 @@ package Yarssr::Config;
 use Yarssr;
 use Yarssr::Feed;
 use Data::Dumper;
+use AnyEvent;
 
 use warnings;
 use strict;
@@ -236,6 +237,7 @@ sub process
 	my ($new_interval,$new_maxfeeds,$new_browser,
 		$new_usegnome,$newfeedlist,$online) = @_;
 	my $rebuild = 0;
+	my $cv = AnyEvent::condvar;
 
 	$options->{'browser'} = $new_browser;
 	$options->{'usegnome'} = $new_usegnome;
@@ -251,6 +253,7 @@ sub process
 		set_interval(undef,$new_interval);
 	}
 
+	$cv->begin;
 	for my $url (keys %{$newfeedlist}) {
 
 		my $feed;
@@ -270,12 +273,17 @@ sub process
 		unless ($feed->get_enabled == $newfeedlist->{$url}[1]) {
 			$feed->toggle_enabled if $feed->get_enabled != 3;
 			if ($feed->get_enabled and $options->{'online'}) {
-				my $activity_guard = Yarssr::GUI->get_icon_activity_blocking_guard();
-				$feed->update->recv;
+				my $activity_guard = Yarssr::GUI->get_icon_activity_guard();
+				$cv->begin;
+				$feed->update->cb(sub {
+					$cv->end;
+					undef $activity_guard;
+				});
 			}
 			$rebuild = 1;
 		}
 	}
+	$cv->end;
 
 	for my $feed (Yarssr->get_feeds_array) {
 		unless (exists $newfeedlist->{$feed->get_url}) {
@@ -287,7 +295,12 @@ sub process
 	$rebuild = 1 if ($options->{'maxfeeds'} != $new_maxfeeds);
 	$options->{'maxfeeds'} = $new_maxfeeds;
 
-	return $rebuild;
+	my $ret_cv = AnyEvent::condvar;
+	$cv->cb(sub {
+		$ret_cv->send($rebuild);
+	});
+
+	return $ret_cv;
 }
 
 sub quit {
