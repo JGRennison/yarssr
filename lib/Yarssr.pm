@@ -6,6 +6,7 @@ use Yarssr::GUI;
 use Yarssr::Config;
 use Locale::gettext;
 use POSIX qw/setlocale/;
+use AnyEvent;
 use base 'Exporter';
 
 use vars qw(
@@ -24,9 +25,11 @@ our $debug = 0;
 our @EXPORT_OK = qw(_);
 
 my $feeds = ();
+my $downloads_active = 0;
 $0 = $NAME;
 
 sub init {
+	Yarssr->log_debug("init");
 	# il8n stuff
 	my $locale = (defined($ENV{LC_MESSAGES}) ? $ENV{LC_MESSAGES} : $ENV{LANG});
 	setlocale(LC_ALL, $locale);
@@ -54,8 +57,8 @@ sub log_debug {
 
 
 sub initial_launch {
+	Yarssr->log_debug("initial_launch");
 	Yarssr::Config->load_initial_state;
-	Glib::Timeout->add(300, sub { 1 });
 
 	if (Yarssr::Config->get_startonline) {
 		download_all();
@@ -87,19 +90,33 @@ sub get_feeds_array
 
 sub download_feed
 {
-	my (undef,$feed) = @_;
-	$feed->update;
+	my (undef, $feed) = @_;
+	my $activity_guard = Yarssr::GUI->get_icon_activity_guard();
+	$feed->update->cb(sub {
+		undef $activity_guard;
+		Yarssr::GUI->redraw_menu;
+		Yarssr::Config->write_states;
+	});
 }
 
 sub download_all
 {
-	Yarssr::GUI->set_icon_active;
+	Yarssr->log_debug("download_all");
+	my $cv = AnyEvent->condvar;
+	my $activity_guard = Yarssr::GUI->get_icon_activity_guard();
+	$cv->begin;
 	for my $feed (@feeds) {
-		Yarssr::GUI->gui_update;
-		$feed->update if $feed->get_enabled;
+		if ($feed->get_enabled) {
+			$cv->begin;
+			$feed->update->cb(sub { $cv->end; });
+		}
 	}
-	Yarssr::GUI->redraw_menu;
-	Yarssr::Config->write_states;
+	$cv->end;
+	$cv->cb(sub {
+		undef $activity_guard;
+		Yarssr::GUI->redraw_menu;
+		Yarssr::Config->write_states;
+	});
 	return 1;
 }
 

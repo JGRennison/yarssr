@@ -10,6 +10,7 @@ use Yarssr::Parser;
 use Yarssr::Fetcher;
 use Data::Dumper;
 use POSIX ":sys_wait_h";
+use Guard;
 
 use constant TRUE=>1,FALSE=>0;
 
@@ -35,6 +36,9 @@ my $dot_full_red_pixbuf;
 my $dot_hollow_red_pixbuf;
 my $blank_pixbuf;
 my $tray_image;
+
+my $activity_refcount = 0;
+my $activity_refcount_blocking = 0;
 
 sub init {
 	my $class = shift;
@@ -65,7 +69,7 @@ sub init {
 	$eventbox = Gtk2::EventBox->new;
 
 	$eventbox->add($tray_image);
-	set_icon_active();
+	update_icon_state();
 
 	$tray->add($eventbox);
 	$tray->show_all;
@@ -121,28 +125,45 @@ sub delete_event {
 	return 1;
 }
 
-sub set_icon_active {
-	$eventbox->signal_handlers_disconnect_by_func(\&handle_button_press);
-	$eventbox->signal_connect("button-press-event", \&ignore_button_press);
-	$tray_image->set_from_pixbuf($paper_red_pixbuf);
-	set_tooltip(_("updating..."));
-	gui_update();
+sub get_icon_activity_guard {
+	$activity_refcount++;
+	update_icon_state();
+	return guard {
+		$activity_refcount--;
+		update_icon_state();
+	};
 }
 
-sub set_icon_inactive {
+sub get_icon_activity_blocking_guard {
+	$activity_refcount++;
+	$activity_refcount_blocking++;
+	update_icon_state();
+	return guard {
+		$activity_refcount--;
+		$activity_refcount_blocking--;
+		update_icon_state();
+	};
+}
+
+sub update_icon_state {
+	Yarssr->log_debug("update_icon_state: active: $activity_refcount, blocking: $activity_refcount_blocking");
+	$eventbox->signal_handlers_disconnect_by_func(\&handle_button_press);
 	$eventbox->signal_handlers_disconnect_by_func(\&ignore_button_press);
-	$eventbox->signal_connect("button-press-event", \&handle_button_press);
-
-	my $newitems = Yarssr->get_total_newitems;
-
-	if ($newitems) {
-		$tray_image->set_from_pixbuf($paper_green_pixbuf);
+	$eventbox->signal_connect("button-press-event", ($activity_refcount_blocking > 0) ? \&ignore_button_press : \&handle_button_press);
+	if ($activity_refcount > 0) {
+		$tray_image->set_from_pixbuf($paper_red_pixbuf);
+		set_tooltip(_("updating..."));
 	} else {
-		$tray_image->set_from_pixbuf($paper_grey_pixbuf);
-	}
+		my $newitems = Yarssr->get_total_newitems;
 
-	set_tooltip($newitems." new links since last update");
-	gui_update();
+		if ($newitems) {
+			$tray_image->set_from_pixbuf($paper_green_pixbuf);
+		} else {
+			$tray_image->set_from_pixbuf($paper_grey_pixbuf);
+		}
+
+		set_tooltip($newitems." new links since last update");
+	}
 }
 
 sub launch_url {
@@ -284,11 +305,11 @@ sub on_pref_ok_button_clicked
 	});
 
 
-	set_icon_active();
+	my $activity_guard = get_icon_activity_blocking_guard();
 	redraw_menu() if Yarssr::Config->process(
 		$interval,$maxfeeds,$browser,$usegnome,$newfeedlist,$online);
 	Yarssr::Config->write_config;
-	set_icon_inactive();
+	undef $activity_guard;
 
 	$treeview->set_model(undef);
 }
@@ -379,7 +400,6 @@ sub redraw_menu {
 		create_feed_menu($feed) if $feed->get_enabled;
 	}
 	create_root_menu();
-	set_icon_inactive();
 }
 
 sub create_root_menu {
@@ -510,27 +530,22 @@ sub create_feed_menu {
 			$menuitem->set_image($image);
 		}
 		$menuitem->signal_connect('activate',sub {
-			menuitem_clicked($menuitem,$item);
+				menuitem_clicked($menuitem,$item);
 			});
 		$feed->get_menu->append($menuitem);
 	}
 	$feed->get_menu->append(Gtk2::SeparatorMenuItem->new);
 	my $update = Gtk2::ImageMenuItem->new(_("Update this feed"));
 	$update->set_image(Gtk2::Image->new_from_stock('gtk-refresh','menu'));
-	$update->signal_connect('activate',sub{
-			set_icon_active();
+	$update->signal_connect('activate', sub {
 			Yarssr->download_feed($feed);
-			redraw_menu();
-			set_icon_inactive();
 		});
 	$feed->get_menu->append($update);
 	my $unmark = Gtk2::ImageMenuItem->new(_("Unmark new"));
 	$unmark->set_image(Gtk2::Image->new_from_stock('gtk-clear','menu'));
-	$unmark->signal_connect('activate',sub{
-			set_icon_active();
+	$unmark->signal_connect('activate',sub {
 			Yarssr->clear_newitems_in_feed($feed);
 			redraw_menu();
-			set_icon_inactive();
 		});
 	$feed->get_menu->append($unmark);
 	$feed->get_menu->show_all;
@@ -742,8 +757,10 @@ sub on_import_button_clicked {
 sub on_import_ok_button_clicked {
 	my $widget = shift;
 	my $url = $gld->get_widget('import_url_entry')->get_text;
-	my ($content,$type) = Yarssr::Fetcher->fetch_opml($url);
-	my $feeds = Yarssr::Parser->parse_opml($content);
+	my $activity_guard = Yarssr::GUI->get_icon_activity_blocking_guard();
+	my $info = Yarssr::Fetcher->fetch_opml($url)->recv; # do a blocking receive, for convenience
+	undef $activity_guard;
+	my $feeds = Yarssr::Parser->parse_opml($info->{content});
 	my $model = $treeview->get_model;
 	for ( @{ $feeds }) {
 		my $iter = $model->append;

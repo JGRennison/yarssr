@@ -269,7 +269,10 @@ sub process
 
 		unless ($feed->get_enabled == $newfeedlist->{$url}[1]) {
 			$feed->toggle_enabled if $feed->get_enabled != 3;
-			$feed->update if $feed->get_enabled and $options->{'online'};
+			if ($feed->get_enabled and $options->{'online'}) {
+				my $activity_guard = Yarssr::GUI->get_icon_activity_blocking_guard();
+				$feed->update->recv;
+			}
 			$rebuild = 1;
 		}
 	}

@@ -1,6 +1,7 @@
 package Yarssr::Feed;
 use Yarssr::Fetcher;
 use Yarssr::FeedIcon;
+use AnyEvent;
 
 use constant TRUE=>1;
 
@@ -27,6 +28,8 @@ sub new {
 	bless $self, $class;
 
 	$self->{'icon'} = Yarssr::FeedIcon->new($self);
+
+	$self->{'downloading'} = 0;
 
 	return $self;
 }
@@ -135,6 +138,12 @@ sub update
 {
 	my $self = shift;
 	my @items;
+	my $cv = AnyEvent::condvar;
+
+	if ($self->{downloading}) {
+		$cv->send(0);
+		return $cv;
+	}
 
 	# Set new items as unread
 	#for ($self->get_items_array) {
@@ -143,29 +152,34 @@ sub update
 
 	#$self->reset_newitems();
 	$self->enable if ($self->get_enabled == 3);
-	my $content = Yarssr::Fetcher->fetch_feed($self);
+	my $content_cv = Yarssr::Fetcher->fetch_feed($self);
+	$content_cv->cb(sub {
+		my $info = $content_cv->recv;
+		my $content = $info->{content};
+		# If download is successful
+		if ($content) {
+			$self->{status} = 0;
 
-	# If download is successful
-	if ($content) {
-		$self->{status} = 0;
-
-		unless (@items = Yarssr::Parser->parse($self,$content)) {
-			$self->{status} = 2;
-		}
-
-		for my $item (reverse @items) {
-			Yarssr::GUI->gui_update;
-			unless ($self->get_item_by_id($item->get_id)) {
-				$self->unshift_item($item);
-				$item->set_parent($self);
+			unless (@items = Yarssr::Parser->parse($self,$content)) {
+				$self->{status} = 2;
 			}
-		}
-		return 1;
-	}
 
-	# If download fails
-	$self->{status} = 1;
-	return 0;
+			for my $item (reverse @items) {
+				unless ($self->get_item_by_id($item->get_id)) {
+					$self->unshift_item($item);
+					$item->set_parent($self);
+				}
+			}
+			$self->{downloading} = 0;
+			$cv->send(1);
+		} else {
+			# If download fails
+			$self->{status} = 1;
+			$self->{downloading} = 0;
+			$cv->send(0);
+		}
+	});
+	return $cv;
 }
 
 sub get_status {

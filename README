@@ -5,11 +5,16 @@ http://yarssr.sf.net
 Perl Module requirements:
 
 XML::RSS
+XML::Parser
+XML::LibXML
 Gtk2 (http://gtk2-perl.sf.net)
 Gtk2::GladeXML
 Gtk2::TrayIcon
-Gnome2::VFS 
-Gnome2 >= 0.94 
+AnyEvent
+AnyEvent::HTTP
+URI::URL
+Guard
+Gnome2 >= 0.94
 
 Check INSTALL file for installation directions.
 

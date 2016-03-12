@@ -1,5 +1,6 @@
 package Yarssr::FeedIcon;
 use Yarssr::Fetcher;
+use AnyEvent;
 
 sub new
 {
@@ -19,7 +20,6 @@ sub new
 	# and attempt to load from the file again
 	unless ($self->load_icon()) {
 		$self->update;
-		$self->load_icon;
 	}
 
 	return $self;
@@ -33,19 +33,20 @@ sub get_pixbuf {
 sub update {
 	my $self = shift;
 
-	my ($content,$type) = Yarssr::Fetcher->fetch_icon($self->{'url'});
-	open(ICO,'>',$self->{'iconfile'})
-		or warn "Could not open icon file: $self->{'iconfile'}\n";
+	my $cv = Yarssr::Fetcher->fetch_icon($self->{'url'});
+	$cv->cb(sub {
+		my $info = $cv->recv;
+		open(my $ico, '>', $self->{'iconfile'})
+			or warn "Could not open icon file: $self->{'iconfile'}\n";
 
-	if ($type ne 'text/html' and $content)
-	{
-		print ICO $content;
-		close(ICO);
-	}
-	else {
-		print ICO "";
-		close(ICO);
-	}
+		if ($info->{type} ne 'text/html' and $info->{content}) {
+			print $ico $info->{content};
+		} else {
+			print $ico "";
+		}
+		close($ico);
+		$self->load_icon;
+	});
 }
 
 sub load_icon {
