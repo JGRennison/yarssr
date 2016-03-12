@@ -37,9 +37,6 @@ install:
 clean:
 	rm -rf build
 
-cleancvs:
-	find . -name CVS -type d -exec rm -rf '{}' \;
-
 uninstall:
 	rm -rf	$(BINDIR)/yarssr \
 		$(LIBDIR) \
