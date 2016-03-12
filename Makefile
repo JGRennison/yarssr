@@ -20,15 +20,18 @@ yarssr:
 
 install:
 	mkdir -p	$(DESTDIR)/$(BINDIR) \
-				$(DESTDIR)/$(DATADIR) \
-				$(DESTDIR)/$(LIBDIR) \
+				$(DESTDIR)/$(DATADIR)/yarssr/pixmaps \
+				$(DESTDIR)/$(LIBDIR)/Yarssr \
 				$(DESTDIR)/$(LOCALEDIR)/en/$(LC_CATEGORY) \
 				$(DESTDIR)/$(LOCALEDIR)/de/$(LC_CATEGORY)
 
 	@echo Copying lib files to $(DESTDIR)/$(DATADIR):
-	@cp -Rp lib/* $(DESTDIR)/$(LIBDIR)/
+	install -m 0644 lib/Yarssr.pm $(DESTDIR)/$(LIBDIR)/
+	install -m 0644 -t $(DESTDIR)/$(LIBDIR)/Yarssr/ lib/Yarssr/*.pm
+
 	@echo Copying share files to $(DESTDIR)/$(DATADIR):
-	@cp -Rp share/* $(DESTDIR)/$(DATADIR)/
+	install -m 0644 share/yarssr/yarssr.glade $(DESTDIR)/$(DATADIR)/yarssr/
+	install -m 0644 -t $(DESTDIR)/$(DATADIR)/yarssr/pixmaps/ share/yarssr/pixmaps/*.png share/yarssr/pixmaps/*.xpm
 
 	install -m 0644 build/locale/en/$(LC_CATEGORY)/yarssr.mo $(DESTDIR)/$(LOCALEDIR)/en/$(LC_CATEGORY)/
 	install -m 0644 build/locale/de/$(LC_CATEGORY)/yarssr.mo $(DESTDIR)/$(LOCALEDIR)/de/$(LC_CATEGORY)/
