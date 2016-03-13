@@ -41,8 +41,9 @@ clean:
 	rm -rf build
 
 uninstall:
-	rm -rf	$(BINDIR)/yarssr \
-		$(LIBDIR) \
-		$(DATADIR)/yarssr
+	rm -rf	$(DESTDIR)/$(BINDIR)/yarssr \
+		$(DESTDIR)/$(LIBDIR) \
+		$(DESTDIR)/$(DATADIR)/yarssr
+	rm $(DESTDIR)/$(LOCALEDIR)/en/$(LC_CATEGORY)/yarssr.mo $(DESTDIR)/$(LOCALEDIR)/de/$(LC_CATEGORY)/yarssr.mo
 
 .PHONY: all yarssr clean install uninstall
