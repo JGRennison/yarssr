@@ -4,6 +4,7 @@ use Yarssr;
 use Yarssr::Feed;
 use Data::Dumper;
 use AnyEvent;
+use File::Slurp;
 
 use warnings;
 use strict;
@@ -51,9 +52,9 @@ sub load_config {
 			or warn "Failed to make state directory: $!\n";
 	}
 	if (-e $config) {
-		open (CONFIG,"<",$config)
+		my @lines = read_file($config, binmode => ':utf8')
 			or warn "Failed to open config file for reading: $!\n";
-		while(<CONFIG>)
+		for (@lines)
 		{
 
 			chomp;
@@ -93,7 +94,6 @@ sub load_config {
 				$return->{online} = $return->{startonline};
 			}
 		}
-		close(CONFIG)
 	}
 
 	Yarssr->log_debug(_("Successfully loaded config"));
@@ -102,20 +102,22 @@ sub load_config {
 
 sub write_config
 {
-	 Yarssr->log_debug(_("Writing config"));
-	open (CONFIG,">",$config)
-		or warn "Failed to open config file for writing: $!\n";
-	print CONFIG "interval=".$options->{'interval'}."\n";
-	print CONFIG "maxfeeds=".$options->{'maxfeeds'}."\n";
-	print CONFIG "browser=".$options->{'browser'}."\n";
-	print CONFIG "usegnome=".$options->{'usegnome'}."\n";
-	print CONFIG "startonline=".$options->{'startonline'}."\n";
+	Yarssr->log_debug(_("Writing config"));
+
+	my @lines;
+	push @lines, "interval=".$options->{'interval'}."\n";
+	push @lines, "maxfeeds=".$options->{'maxfeeds'}."\n";
+	push @lines, "browser=".$options->{'browser'}."\n";
+	push @lines, "usegnome=".$options->{'usegnome'}."\n";
+	push @lines, "startonline=".$options->{'startonline'}."\n";
 	for my $feed (Yarssr->get_feeds_array)
 	{
-		print CONFIG "feed=".$feed->get_url.";".$feed->get_title.
-		";".$feed->get_enabled.";".$feed->get_username.":".
-		$feed->get_password."\n";
+		push @lines, "feed=".$feed->get_url.";".$feed->get_title.
+			";".$feed->get_enabled.";".$feed->get_username.":".
+			$feed->get_password."\n";
 	}
+	write_file($config, { atomic => 1, binmode => ':utf8' }, @lines)
+		or warn "Failed to open config file for writing: $!\n";
 	close(CONFIG);
 }
 
