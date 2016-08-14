@@ -53,14 +53,15 @@ sub parse_rss
 			my $item = ${$parser->{'items'}}[$count];
 			my $link = $item->{'link'};
 			$link = $item->{'guid'} unless $link;
+			my $id = $item->{'guid'};
 
 			# Fix amperstands
 			$link =~ s/&amp;/&/g;
 
 			my $article = Yarssr::Item->new(
-				url	=> $link,
-				title	=> $item->{'title'},
-				id	=> $link."___".$item->{'title'},
+				url     => $link,
+				title   => $item->{'title'},
+				id      => $id,
 			);
 			push @items, $article;
 		}
@@ -79,7 +80,7 @@ sub parse_atom {
 	}
 
 	foreach my $entry ($xpc->findnodes('x:entry', $doc->documentElement())) {
-		my ($title, $link);
+		my ($title, $link, $id);
 		foreach ($xpc->findnodes('x:title', $entry)) {
 			$title = $_->textContent;
 			$title =~ s/^\s*(.*)\s*$/$1/;
@@ -89,12 +90,15 @@ sub parse_atom {
 				$link = $_->getAttribute("href");
 			}
 		}
+		foreach ($xpc->findnodes('x:id', $entry)) {
+			$id = $_->textContent;
+		}
 
 		if ($title and $link) {
 			my $article = Yarssr::Item->new(
 				title	=> $title,
 				url		=> $link,
-				id		=> $link."___".$title,
+				id		=> $id,
 			);
 			push @items, $article;
 		}

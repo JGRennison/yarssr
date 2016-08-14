@@ -18,6 +18,11 @@ sub new {
 	bless $self,$class;
 }
 
+sub get_pseudo_id {
+	my $self = shift;
+	return $self->{url} . "___" . $self->{title};
+}
+
 foreach my $field (qw(title url status parent id)) {
 	*{"get_$field"} = sub {
 		my $self = shift;

@@ -155,13 +155,19 @@ sub write_state
 		my $status = 1;
 		$status = 2 if ( $item->get_status > 1);
 
-		$rss->add_item(
+		my @args = (
 			title	=> $item->get_title,
 			link	=> $item->get_url,
 			dc	=> {
 				description	=> "read: ".$status,
 			},
 		);
+		if ($item->get_id()) {
+			push @args, (yarssr => {
+				guid => $item->get_id(),
+			});
+		}
+		$rss->add_item(@args);
 	}
 	open RSS,">:utf8",$statedir.$feed->get_title.".xml";
 	print RSS $rss->as_string or die $!;
@@ -193,10 +199,14 @@ sub load_state
 		for (@{$rss->{'items'}}) {
 			$_->{dc}{description} =~ /read: (\d)$/;
 			my $read = $1;
+			my $id;
+			eval {
+				$id = $_->{yarssr}->{'guid'};
+			};
 			my $item = Yarssr::Item->new(
 				title	=> $_->{'title'},
 				url	=> $_->{'link'},
-				id	=> $_->{'link'}."___".$_->{'title'},
+				id	=> $id,
 				parent	=> $feed,
 			);
 			$item->set_status($read);

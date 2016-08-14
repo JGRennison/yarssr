@@ -165,7 +165,12 @@ sub update
 			}
 
 			for my $item (reverse @items) {
-				unless ($self->get_item_by_id($item->get_id)) {
+				my $existing_item = $self->get_item_by_id($item->get_id(), $item->get_pseudo_id());
+				if ($existing_item) {
+					$existing_item->set_id($item->get_id());
+					$existing_item->set_url($item->get_url());
+					$existing_item->set_title($item->get_title());
+				} else {
 					$self->unshift_item($item);
 					$item->set_parent($self);
 				}
@@ -192,8 +197,9 @@ sub get_status {
 sub get_item_by_id {
 	my $self = shift;
 	my $id = shift;
+	my $pseudo_id = shift;
 	for (@{$self->{'items'}}) {
-		return $_ if $_->get_id eq $id;
+		return $_ if ($id && ($_->get_id() eq $id)) || ($pseudo_id && ($_->get_pseudo_id() eq $pseudo_id));
 	}
 	return 0;
 }
