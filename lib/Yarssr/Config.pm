@@ -157,15 +157,12 @@ sub write_state
 		my @args = (
 			title	=> $item->get_title,
 			link	=> $item->get_url,
-			dc	=> {
-				description	=> "read: ".$status,
-			},
 		);
-		if ($item->get_id()) {
-			push @args, (yarssr => {
-				guid => $item->get_id(),
-			});
-		}
+		my $yarssr_ns = {
+			read => $status,
+		};
+		$yarssr_ns->{guid} = $item->get_id() if $item->get_id();
+		push @args, (yarssr => $yarssr_ns);
 		$rss->add_item(@args);
 	}
 	write_file($statedir . $feed->get_title() . ".xml", { atomic => 1, binmode => ':utf8' }, $rss->as_string);
@@ -194,8 +191,16 @@ sub load_state
 			$feed->set_last_modified($rss->channel()->{yarssr}->{'last_modified'});
 		};
 		for (@{$rss->{'items'}}) {
-			$_->{dc}{description} =~ /read: (\d)$/;
-			my $read = $1;
+			my $read;
+			eval {
+				$read = $_->{yarssr}->{'read'};
+			};
+			eval {
+				if ($_->{dc} && $_->{dc}{description} =~ /read: (\d)$/) {
+					$read = $1;
+				}
+			};
+
 			my $id;
 			eval {
 				$id = $_->{yarssr}->{'guid'};
