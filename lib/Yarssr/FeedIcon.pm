@@ -1,5 +1,6 @@
 package Yarssr::FeedIcon;
 use Yarssr::Fetcher;
+use File::Slurp;
 use AnyEvent;
 
 sub new
@@ -36,15 +37,11 @@ sub update {
 	my $cv = Yarssr::Fetcher->fetch_icon($self->{'url'});
 	$cv->cb(sub {
 		my $info = $cv->recv;
-		open(my $ico, '>', $self->{'iconfile'})
-			or warn "Could not open icon file: $self->{'iconfile'}\n";
-
 		if ($info->{type} ne 'text/html' and $info->{content}) {
-			print $ico $info->{content};
+			write_file($self->{'iconfile'}, { err_mode => 'carp', atomic => 1, binmode => ':raw' }, $info->{content});
 		} else {
-			print $ico "";
+			write_file($self->{'iconfile'}, { err_mode => 'carp', atomic => 1, binmode => ':raw' }, "");
 		}
-		close($ico);
 		$self->load_icon;
 	});
 }

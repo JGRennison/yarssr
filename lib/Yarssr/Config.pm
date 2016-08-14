@@ -116,8 +116,7 @@ sub write_config
 			";".$feed->get_enabled.";".$feed->get_username.":".
 			$feed->get_password."\n";
 	}
-	write_file($config, { atomic => 1, binmode => ':utf8' }, @lines)
-		or warn "Failed to open config file for writing: $!\n";
+	write_file($config, { atomic => 1, binmode => ':utf8' }, @lines);
 }
 
 sub write_states {
@@ -169,9 +168,7 @@ sub write_state
 		}
 		$rss->add_item(@args);
 	}
-	open RSS,">:utf8",$statedir.$feed->get_title.".xml";
-	print RSS $rss->as_string or die $!;
-	close RSS;
+	write_file($statedir . $feed->get_title() . ".xml", { atomic => 1, binmode => ':utf8' }, $rss->as_string);
 
 	return 0;
 }
