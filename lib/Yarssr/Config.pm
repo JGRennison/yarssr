@@ -118,7 +118,6 @@ sub write_config
 	}
 	write_file($config, { atomic => 1, binmode => ':utf8' }, @lines)
 		or warn "Failed to open config file for writing: $!\n";
-	close(CONFIG);
 }
 
 sub write_states {
