@@ -36,16 +36,30 @@ sub update {
 	my $self = shift;
 
 	my $icon_url = $self->{feed}->get_icon_url();
-	$icon_url = URI::URL->new('/favicon.ico', $self->{feed}->get_url()) unless $icon_url;
+	if ($icon_url) {
+		$self->_try_update($icon_url);
+	} else {
+		my $feed_url = $self->{feed}->get_url();
+		$self->_try_update(URI::URL->new('/favicon.ico', $feed_url)->abs, URI::URL->new('/favicon.png', $feed_url)->abs);
+	}
+}
+
+sub _try_update {
+	my ($self, @urls) = @_;
+	my $icon_url = shift @urls;
 	my $cv = Yarssr::Fetcher->fetch_icon($icon_url);
 	$cv->cb(sub {
 		my $info = $cv->recv;
 		if ($info->{type} ne 'text/html' and $info->{content}) {
 			write_file($self->{'iconfile'}, { err_mode => 'carp', atomic => 1, binmode => ':raw' }, $info->{content});
+			$self->{feed}->set_icon_url($icon_url);
+			$self->load_icon;
+		} elsif (scalar @urls) {
+			$self->_try_update(@urls);
 		} else {
 			write_file($self->{'iconfile'}, { err_mode => 'carp', atomic => 1, binmode => ':raw' }, "");
+			$self->load_icon;
 		}
-		$self->load_icon;
 	});
 }
 
