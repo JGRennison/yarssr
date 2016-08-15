@@ -21,8 +21,6 @@ my $prop_dialog;
 my $gld;
 my $menu;
 my $pref_menu;
-my $menu_x;
-my $menu_y;
 my $icon;
 my $eventbox;
 my $tooltips;
@@ -598,25 +596,20 @@ sub handle_button_press {
 	my $widget = shift;
 	my $event = shift;
 
-	$menu_x = $event->x_root - $event->x;
-	$menu_y = $event->y_root - $event->y;
-
-	if ($event->button == 1) {
-		$menu->popup(undef,undef,\&position_menu,0,$event->button,$event->time)
-	}
-	else {
-		$pref_menu->popup(undef,undef,\&position_menu,0,$event->button,$event->time);
-	}
+	my $menu_x = $event->x_root - $event->x;
+	my $menu_y = $event->y_root - $event->y;
+	my $m = ($event->button == 1) ? $menu : $pref_menu;
+	my $handler = sub {
+		return position_menu($m, $menu_x, $menu_y);
+	};
+	$m->popup(undef, undef, $handler, 0, $event->button, $event->time)
 }
 
 sub position_menu {
-
+	my ($menu, $x, $y) = @_;
 	# Shamlessly stolen from Muine :-)
 
-	my $x = $menu_x;
-	my $y = $menu_y;
-
-	my $monitor = $menu->get_screen->get_monitor_at_point($x,$y);
+	my $monitor = $menu->get_screen->get_monitor_at_point($x, $y);
 	my $rect = $menu->get_screen->get_monitor_geometry($monitor);
 
 	my $space_above = $y - $rect->y;
@@ -624,35 +617,22 @@ sub position_menu {
 
 	my $requisition = $menu->size_request();
 
-	if ($requisition->height <= $space_above ||
-	$requisition->height <= $space_below) {
-
-	if ($requisition->height <= $space_below) {
-		$y = $y + $eventbox->allocation->height;
-	}
-
-	else {
-		$y = $y - $requisition->height;
-	}
-
-	}
-
-	elsif ($requisition->height > $space_below and
-	$requisition->height > $space_above) {
-
-	if ($space_below >= $space_above) {
-		$y = $rect->y + $rect->height - $requisition->height;
-	}
-
-	else {
+	if ($requisition->height <= $space_above || $requisition->height <= $space_below) {
+		if ($requisition->height <= $space_below) {
+			$y = $y + $eventbox->allocation->height;
+		} else {
+			$y = $y - $requisition->height;
+		}
+	} elsif ($requisition->height > $space_below and $requisition->height > $space_above) {
+		if ($space_below >= $space_above) {
+			$y = $rect->y + $rect->height - $requisition->height;
+		} else {
+			$y = $rect->y;
+		}
+	} else {
 		$y = $rect->y;
 	}
-	}
-
-	else {
-	$y = $rect->y;
-	}
-	return ($x,$y,1);
+	return ($x, $y, 1);
 }
 
 sub gui_update {
