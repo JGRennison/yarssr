@@ -2,6 +2,7 @@ package Yarssr::FeedIcon;
 use Yarssr::Fetcher;
 use File::Slurp;
 use AnyEvent;
+use URI::URL;
 
 sub new
 {
@@ -11,8 +12,8 @@ sub new
 	my $icondir = $Yarssr::Config::icondir;
 
 	my $self = {
-		iconfile	=> $icondir.$feed->get_title.".ico",
-		url		=> $feed->get_url,
+		iconfile    => $icondir.$feed->get_title.".ico",
+		feed        => $feed,
 	};
 
 	bless $self,$class;
@@ -34,7 +35,9 @@ sub get_pixbuf {
 sub update {
 	my $self = shift;
 
-	my $cv = Yarssr::Fetcher->fetch_icon($self->{'url'});
+	my $icon_url = $self->{feed}->get_icon_url();
+	$icon_url = URI::URL->new('/favicon.ico', $self->{feed}->get_url()) unless $icon_url;
+	my $cv = Yarssr::Fetcher->fetch_icon($icon_url);
 	$cv->cb(sub {
 		my $info = $cv->recv;
 		if ($info->{type} ne 'text/html' and $info->{content}) {

@@ -231,4 +231,24 @@ sub clear_newitems {
 	}
 }
 
+sub get_icon_url {
+	my $self = shift;
+	return $self->{'icon_url'};
+}
+
+sub set_icon_url {
+	my $self = shift;
+	my $url = shift;
+	$self->{'icon_url'} = $url;
+}
+
+sub set_icon_url_update {
+	my $self = shift;
+	my $url = shift;
+	if (!$self->{'icon_url'} || $self->{'icon_url'} ne $url) {
+		$self->{'icon_url'} = $url;
+		$self->{'icon'}->update();
+	}
+}
+
 1;

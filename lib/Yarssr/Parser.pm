@@ -48,6 +48,13 @@ sub parse_rss
 	}
 	else {
 
+		eval {
+			if ($parser->{'image'} && $parser->{'image'}->{'url'}) {
+				$feed->set_icon_url_update($parser->{'image'}->{'url'});
+			}
+		};
+		warn $@ if $@;
+
 		for my $count (0 .. $#{$parser->{'items'}})
 		{
 			my $item = ${$parser->{'items'}}[$count];
@@ -78,6 +85,17 @@ sub parse_atom {
 	if ($doc->documentElement()->namespaceURI() ne 'http://www.w3.org/2005/Atom') {
 		Yarssr->log_debug("Unexpected namespace: " . $doc->documentElement()->namespaceURI());
 	}
+
+	eval {
+		my $icon;
+		$icon = $_->textContent for $xpc->findnodes('x:logo', $doc->documentElement());
+		$icon = $_->textContent for $xpc->findnodes('x:icon', $doc->documentElement());
+		if ($icon) {
+			$feed->set_icon_url_update($icon);
+		}
+	};
+	warn $@ if $@;
+
 
 	foreach my $entry ($xpc->findnodes('x:entry', $doc->documentElement())) {
 		my ($title, $link, $id);

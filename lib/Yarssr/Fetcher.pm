@@ -24,7 +24,7 @@ sub fetch_icon {
 	my ($pkg, $url) = @_;
 	caller eq 'Yarssr::FeedIcon' or die;
 
-	my $icon_url = URI::URL->new('/favicon.ico', $url);
+	my $icon_url = URI::URL->new($url);
 
 	if ($icon_url->scheme eq 'http' || $icon_url->scheme eq 'https') {
 		return _download($url);

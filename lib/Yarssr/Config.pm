@@ -145,6 +145,7 @@ sub write_state
 		link	=> $feed->get_url,
 		yarssr	=> {
 			last_modified => $feed->get_last_modified,
+			icon_url      => $feed->get_icon_url // '',
 		},
 	);
 	my $count = 0;
@@ -189,6 +190,9 @@ sub load_state
 		return if $@;
 		eval {
 			$feed->set_last_modified($rss->channel()->{yarssr}->{'last_modified'});
+		};
+		eval {
+			$feed->set_icon_url($rss->channel()->{yarssr}->{'icon_url'});
 		};
 		for (@{$rss->{'items'}}) {
 			my $read;
