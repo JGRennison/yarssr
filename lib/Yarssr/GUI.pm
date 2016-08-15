@@ -471,10 +471,14 @@ sub create_prefs_menu {
 	$about->set_image(Gtk2::Image->new_from_stock('gnome-stock-about','menu'));
 	$about->signal_connect('activate',\&on_about_button_clicked);
 	$prefs->signal_connect('activate',\&prefs_show);
-	$quit->signal_connect('activate',sub {
+	$quit->signal_connect('activate', sub {
 		Yarssr::Config->write_config;
 		Yarssr::Config->write_states;
-		exit;});
+		Glib::Idle->add(sub {
+			quit();
+			exit;
+		});
+	});
 	$pref_menu->append($online);
 	$pref_menu->append($prefs);
 	$pref_menu->append($about);
