@@ -144,8 +144,10 @@ sub write_state
 		title	=> $feed->get_title,
 		link	=> $feed->get_url,
 		yarssr	=> {
-			last_modified => $feed->get_last_modified,
-			icon_url      => $feed->get_icon_url // '',
+			last_modified      => $feed->get_last_modified,
+			icon_url           => $feed->get_icon_url // '',
+			icon_fetch_time    => $feed->get_icon_fetch_time,
+			icon_last_modified => $feed->get_icon_last_modified,
 		},
 	);
 	my $count = 0;
@@ -193,6 +195,12 @@ sub load_state
 		};
 		eval {
 			$feed->set_icon_url($rss->channel()->{yarssr}->{'icon_url'});
+		};
+		eval {
+			$feed->set_icon_fetch_time($rss->channel()->{yarssr}->{'icon_fetch_time'} // 0);
+		};
+		eval {
+			$feed->set_icon_last_modified($rss->channel()->{yarssr}->{'icon_last_modified'});
 		};
 		for (@{$rss->{'items'}}) {
 			my $read;

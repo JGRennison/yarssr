@@ -59,10 +59,21 @@ sub unshift_item {
 	#reverse(sort {$a->get_date <=> $b->get_date} @{$self->{'items'}});
 }
 
-foreach my $field (qw(title date url interval menu username password last_modified)) {
+foreach my $field (qw(title date url interval menu username password last_modified icon_last_modified)) {
 	*{"get_$field"} = sub {
 		my $self = shift;
 		defined $self->{$field} ? return $self->{$field} : return "";
+	};
+	*{"set_$field"} = sub {
+		my $self = shift;
+		$self->{$field} = shift;
+		return 1;
+	};
+}
+foreach my $field (qw(icon_fetch_time)) {
+	*{"get_$field"} = sub {
+		my $self = shift;
+		defined $self->{$field} ? return $self->{$field} : return 0;
 	};
 	*{"set_$field"} = sub {
 		my $self = shift;
@@ -74,11 +85,6 @@ foreach my $field (qw(title date url interval menu username password last_modifi
 sub get_icon {
 	my $self = shift;
 	return $self->{'icon'}->get_pixbuf;
-}
-
-sub update_icon {
-	my $self = shift;
-	$self->{'icon'}->update;
 }
 
 sub enable
@@ -144,6 +150,8 @@ sub update
 		$cv->send(0);
 		return $cv;
 	}
+
+	$self->{'icon'}->update_if_stale();
 
 	# Set new items as unread
 	#for ($self->get_items_array) {

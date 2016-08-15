@@ -32,35 +32,84 @@ sub get_pixbuf {
 	return $self->{'pixbuf'};
 }
 
+sub update_if_stale {
+	my $self = shift;
+	my $interval;
+	if (! -e $self->{'iconfile'}) {
+		$self->update();
+		return;
+	} elsif (! -s $self->{'iconfile'}) {
+		$interval = 12 * 60 * 60; # 12 hours
+	} else {
+		$interval = 4 * 24 * 60 * 60; # 4 days
+	}
+	if (time - $self->{feed}->get_icon_fetch_time() > $interval) {
+		$self->update();
+	}
+}
+
 sub update {
 	my $self = shift;
 
 	my $icon_url = $self->{feed}->get_icon_url();
+	my $cv;
 	if ($icon_url) {
-		$self->_try_update($icon_url);
+		$cv = $self->_try_update($icon_url, -s $self->{'iconfile'} && $self->{feed}->get_icon_last_modified());
 	} else {
 		my $feed_url = $self->{feed}->get_url();
-		$self->_try_update(URI::URL->new('/favicon.ico', $feed_url)->abs, URI::URL->new('/favicon.png', $feed_url)->abs);
+		$cv = AnyEvent::condvar;
+		$self->_try_update_list($cv, URI::URL->new('/favicon.ico', $feed_url)->abs, URI::URL->new('/favicon.png', $feed_url)->abs);
 	}
+	$cv->cb(sub {
+		$self->_fail_update() unless $cv->recv;
+	});
+}
+
+sub _try_update_list {
+	my ($self, $ret_cv, @urls) = @_;
+	$self->_try_update(shift @urls)->cb(sub {
+		my ($cv) = @_;
+		if ($cv->recv) {
+			$ret_cv->send(1);
+		} elsif (scalar @urls) {
+			$self->_try_update_list($ret_cv, @urls);
+		} else {
+			$ret_cv->send(0);
+		}
+	});
 }
 
 sub _try_update {
-	my ($self, @urls) = @_;
-	my $icon_url = shift @urls;
+	my ($self, $icon_url, $last_modified) = @_;
+	my $ret_cv = AnyEvent::condvar;
 	my $cv = Yarssr::Fetcher->fetch_icon($icon_url);
 	$cv->cb(sub {
 		my $info = $cv->recv;
 		if ($info->{type} ne 'text/html' and $info->{content}) {
 			write_file($self->{'iconfile'}, { err_mode => 'carp', atomic => 1, binmode => ':raw' }, $info->{content});
 			$self->{feed}->set_icon_url($icon_url);
+			$self->{feed}->set_icon_fetch_time(time);
+			$self->{feed}->set_icon_last_modified($info->{last_modified});
 			$self->load_icon;
-		} elsif (scalar @urls) {
-			$self->_try_update(@urls);
+			$ret_cv->send(1);
+		} elsif ($info->{type} ne 'text/html' and $info->{not_modified} and -s $self->{'iconfile'}) {
+			$self->{feed}->set_icon_fetch_time(time);
+			$ret_cv->send(1);
 		} else {
-			write_file($self->{'iconfile'}, { err_mode => 'carp', atomic => 1, binmode => ':raw' }, "");
-			$self->load_icon;
+			$ret_cv->send(0);
 		}
 	});
+	return $ret_cv;
+}
+
+sub _fail_update {
+	my $self = shift;
+	if (! -e $self->{'iconfile'}) {
+		write_file($self->{'iconfile'}, { err_mode => 'carp', atomic => 1, binmode => ':raw' }, "");
+		$self->{feed}->set_icon_last_modified(undef);
+	}
+	$self->{feed}->set_icon_fetch_time(time);
+	$self->load_icon;
 }
 
 sub load_icon {
