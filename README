@@ -9,7 +9,11 @@ This is a fork of the original (v0.2.2) from http://yarssr.sf.net with the follo
 * Do downloads asynchronously and in parallel using AnyEvent::HTTP instead of using Gnome VFS.
 * Only re-download feeds if they have changed since the last download, using the If-Modified-Since header.
 * Fix favicon downloads uing the wrong URL on HTTPS domains.
-* Make writes to the config file atomic
+* Support extracting icon URLs from RSS and Atom feeds, and if not try a PNG favicon URL as well as an ICO one.
+* Make writes to the config file, saved feed state files and icon files atomic
+* Use RSS GUID and Atom ID for more reliable detection of existing feed items, and support updating the title and URL of existing feed items
+* Fix harmless segfault on exit.
+* Fix incorrect screen placement of tray icon right-click menu.
 
 URL: https://github.com/JGRennison/yarssr
 
