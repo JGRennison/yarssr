@@ -37,11 +37,14 @@ sub init {
 	bindtextdomain(lc($NAME), sprintf('%s/share/locale', $PREFIX));
 	textdomain(lc($NAME));
 
-	# Wait 2 seconds before loading config and begining downloads
 	Gnome2::Program->init($0,$VERSION);
-	Glib::Timeout->add(1000,\&initial_launch);
 	Yarssr::Config->init;
-	Yarssr::GUI->init;
+	Yarssr::Config->load_initial_state;
+
+	my $cv = AnyEvent::condvar;
+	$cv->cb(\&initial_launch);
+	Yarssr::GUI->init($cv);
+
 }
 
 sub quit {
@@ -59,13 +62,9 @@ sub log_debug {
 
 sub initial_launch {
 	Yarssr->log_debug("initial_launch");
-	Yarssr::Config->load_initial_state;
-
+	Yarssr::GUI->redraw_menu;
 	if (Yarssr::Config->get_startonline) {
 		download_all();
-	}
-	else {
-		Yarssr::GUI->redraw_menu;
 	}
 
 	return 0;

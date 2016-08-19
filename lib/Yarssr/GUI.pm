@@ -40,6 +40,7 @@ my $activity_refcount_blocking = 0;
 
 sub init {
 	my $class = shift;
+	my $cv = shift;
 
 	Gtk2->init;
 
@@ -113,6 +114,8 @@ sub init {
 	$scrolledwindow->add($treeview);
 
 	create_prefs_menu();
+
+	$cv->send();
 
 	Gtk2->main;
 };
