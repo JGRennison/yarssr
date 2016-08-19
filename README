@@ -14,6 +14,8 @@ This is a fork of the original (v0.2.2) from http://yarssr.sf.net with the follo
 * Use RSS GUID and Atom ID for more reliable detection of existing feed items, and support updating the title and URL of existing feed items
 * Fix harmless segfault on exit.
 * Fix incorrect screen placement of tray icon right-click menu.
+* Add option whether to clear item 'new' state when program restarted.
+* Various minor fixes.
 
 URL: https://github.com/JGRennison/yarssr
 
