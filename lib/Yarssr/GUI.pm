@@ -576,9 +576,8 @@ sub menuitem_clicked {
 	}
 
 	my $newitems;
-
 	if ($status > 2) {
-		$newitesms = $feed->subtract_newitem();
+		$newitems = $feed->subtract_newitem();
 	}
 
 	$item->set_status(1);
