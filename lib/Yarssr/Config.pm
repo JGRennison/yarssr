@@ -35,6 +35,7 @@ sub load_config {
 		maxfeeds => 8,
 		online	 => 1,
 		startonline => 1,
+		clearnewonrestart => 1,
 	};
 
 	if (! -e $configdir)
@@ -93,6 +94,10 @@ sub load_config {
 				$return->{startonline} = $1;
 				$return->{online} = $return->{startonline};
 			}
+			elsif (/^clearnewonrestart=(\d)/)
+			{
+				$return->{clearnewonrestart} = $1;
+			}
 		}
 	}
 
@@ -110,6 +115,7 @@ sub write_config
 	push @lines, "browser=".$options->{'browser'}."\n";
 	push @lines, "usegnome=".$options->{'usegnome'}."\n";
 	push @lines, "startonline=".$options->{'startonline'}."\n";
+	push @lines, "clearnewonrestart=".$options->{'clearnewonrestart'}."\n";
 	for my $feed (Yarssr->get_feeds_array)
 	{
 		push @lines, "feed=".$feed->get_url.";".$feed->get_title.
@@ -154,8 +160,10 @@ sub write_state
 	for my $item ($feed->get_items_array) {
 		# Limit number of items per feed to save
 		last if $count++ >= 100;
-		my $status = 1;
-		$status = 2 if ( $item->get_status > 1);
+		my $status = $item->get_status;
+		if ($status >= 3) {
+			$status = $options->{'clearnewonrestart'} ? 2 : 3;
+		}
 
 		my @args = (
 			title	=> $item->get_title,
@@ -225,6 +233,7 @@ sub load_state
 			);
 			$item->set_status($read);
 			$feed->add_item($item);
+			$feed->add_newitem() if $read == 3;
 		}
 	}
 }
@@ -264,11 +273,17 @@ sub set_usegnome
 	$options->{'usegnome'} = shift;
 }
 
+sub set_clearnewonrestart
+{
+	my $class = shift;
+	$options->{'clearnewonrestart'} = shift;
+}
+
 sub process
 {
 	my $class = shift;
 	my ($new_interval,$new_maxfeeds,$new_browser,
-		$new_usegnome,$newfeedlist,$online) = @_;
+		$new_usegnome,$newfeedlist,$online,$clearnewonrestart) = @_;
 	my $rebuild = 0;
 	my $cv = AnyEvent::condvar;
 
@@ -281,6 +296,8 @@ sub process
 	else {
 		$options->{'startonline'} = 0;
 	}
+
+	$options->{'clearnewonrestart'} = $clearnewonrestart ? 1 : 0;
 
 	if ($new_interval != $options->{'interval'}) {
 		set_interval(undef,$new_interval);
@@ -343,7 +360,7 @@ sub quit {
 
 no strict;
 
-foreach my $field (qw(browser usegnome interval maxfeeds online startonline)) {
+foreach my $field (qw(browser usegnome interval maxfeeds online startonline clearnewonrestart)) {
 	*{"get_$field"} = sub {
 		return $options->{$field};
 	};

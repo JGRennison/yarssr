@@ -238,6 +238,8 @@ sub prefs_show
 		Yarssr::Config->get_usegnome);
 	$gld->get_widget('start_online_checkbutton')->set_active(
 		Yarssr::Config->get_startonline);
+	$gld->get_widget('clear_new_on_restart_checkbox')->set_active(
+		Yarssr::Config->get_clearnewonrestart);
 
 	$gld->get_widget('pref_ok_button')->grab_focus;
 
@@ -284,6 +286,7 @@ sub on_pref_ok_button_clicked
 	my $maxfeeds = $gld->get_widget('headings_entry')->get_text;
 	my $browser = $gld->get_widget('browser_entry')->get_text;
 	my $online = $gld->get_widget('start_online_checkbutton')->get_active;
+	my $clearnewonrestart = $gld->get_widget('clear_new_on_restart_checkbox')->get_active;
 	my $usegnome;
 
 	if ($gld->get_widget('use_default_browser_checkbox')->get_active) {
@@ -303,7 +306,7 @@ sub on_pref_ok_button_clicked
 	});
 
 	my $cv = Yarssr::Config->process(
-		$interval,$maxfeeds,$browser,$usegnome,$newfeedlist,$online);
+		$interval,$maxfeeds,$browser,$usegnome,$newfeedlist,$online,$clearnewonrestart);
 	$cv->cb(sub {
 		redraw_menu() if $cv->recv;
 		Yarssr::Config->write_config;
@@ -398,6 +401,7 @@ sub redraw_menu {
 		create_feed_menu($feed) if $feed->get_enabled;
 	}
 	create_root_menu();
+	update_icon_state();
 }
 
 sub create_root_menu {
