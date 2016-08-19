@@ -1,5 +1,8 @@
 package Yarssr::GUI;
 
+use strict;
+use warnings;
+
 use Gtk2;
 use Gtk2::GladeXML;
 use Gtk2::SimpleList;
@@ -16,6 +19,7 @@ use constant TRUE=>1,FALSE=>0;
 
 my $prefs_window;
 my $import_dialog;
+my $feedinfo_dialog;
 my $add_dialog;
 my $prop_dialog;
 my $gld;
@@ -174,7 +178,7 @@ sub launch_url {
 		Gnome2::URL->show($url);
 	}
 	else {
-		if ($child = fork)
+		if (my $child = fork)
 		{
 			Glib::Timeout->add(200,
 				sub {
@@ -489,7 +493,7 @@ sub create_prefs_menu {
 	$pref_menu->append($about);
 	$pref_menu->append($quit);
 	$pref_menu->show_all;
-	return $prefs_menu;
+	return $pref_menu;
 }
 
 sub create_feed_menu {

@@ -1,4 +1,8 @@
 package Yarssr::Feed;
+
+use strict;
+use warnings;
+
 use Yarssr::Fetcher;
 use Yarssr::FeedIcon;
 use AnyEvent;
@@ -60,6 +64,8 @@ sub unshift_item {
 }
 
 foreach my $field (qw(title date url interval menu username password last_modified icon_last_modified)) {
+	no strict 'refs';
+
 	*{"get_$field"} = sub {
 		my $self = shift;
 		defined $self->{$field} ? return $self->{$field} : return "";
@@ -71,6 +77,8 @@ foreach my $field (qw(title date url interval menu username password last_modifi
 	};
 }
 foreach my $field (qw(icon_fetch_time)) {
+	no strict 'refs';
+
 	*{"get_$field"} = sub {
 		my $self = shift;
 		defined $self->{$field} ? return $self->{$field} : return 0;
@@ -207,7 +215,7 @@ sub get_item_by_id {
 	my $id = shift;
 	my $pseudo_id = shift;
 	for (@{$self->{'items'}}) {
-		return $_ if ($id && ($_->get_id() eq $id)) || ($pseudo_id && ($_->get_pseudo_id() eq $pseudo_id));
+		return $_ if ($id && $_->get_id() && ($_->get_id() eq $id)) || ($pseudo_id && $_->get_pseudo_id() && ($_->get_pseudo_id() eq $pseudo_id));
 	}
 	return 0;
 }

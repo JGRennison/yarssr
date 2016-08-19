@@ -1,5 +1,8 @@
 package Yarssr::Config;
 
+use strict;
+use warnings;
+
 use Yarssr;
 use Yarssr::Feed;
 use Data::Dumper;
@@ -361,6 +364,8 @@ sub quit {
 no strict;
 
 foreach my $field (qw(browser usegnome interval maxfeeds online startonline clearnewonrestart)) {
+	no strict 'refs';
+
 	*{"get_$field"} = sub {
 		return $options->{$field};
 	};

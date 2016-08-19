@@ -1,4 +1,8 @@
 package Yarssr::Parser;
+
+use strict;
+use warnings;
+
 use Data::Dumper;
 use Yarssr::Item;
 use Yarssr::Feed;
@@ -104,7 +108,7 @@ sub parse_atom {
 			$title =~ s/^\s*(.*)\s*$/$1/;
 		}
 		foreach ($xpc->findnodes('x:link', $entry)) {
-			if ($_->getAttribute("rel") eq "alternate" || !length $_->getAttribute("rel")) {
+			if (!length $_->getAttribute("rel") || $_->getAttribute("rel") eq "alternate") {
 				$link = $_->getAttribute("href");
 			}
 		}
@@ -128,7 +132,7 @@ sub parse_opml {
 	my ($class,$content) = @_;
 	my @feeds;
 
-	my $parser = new XML::Parser(Style => Tree);
+	my $parser = new XML::Parser(Style => 'Tree');
 	my $tree = eval{ $parser->parse($content) };
 
 	if ($@) {

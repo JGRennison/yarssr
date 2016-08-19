@@ -1,5 +1,8 @@
 package Yarssr;
 
+use strict;
+use warnings;
+
 use Gnome2;
 use Gtk2;
 use Yarssr::GUI;
@@ -25,7 +28,7 @@ our @TESTERS	= (	"Thanks to Joachim Breitner for testing\n".
 our $debug = 0;
 our @EXPORT_OK = qw(_);
 
-my $feeds = ();
+my @feeds;
 my $downloads_active = 0;
 $0 = $NAME;
 
@@ -77,9 +80,8 @@ sub add_feed {
 	return 0 if (Yarssr->get_feed_by_url($feed->get_url) and
 		Yarssr->get_feed_by_title($feed->get_title));
 
-	push @feeds,$feed;
-	@feeds = sort {
-		lc $a->get_title cmp lc $b->get_title} @feeds;
+	push @feeds, $feed;
+	@feeds = sort { lc $a->get_title cmp lc $b->get_title } @feeds;
 	return 1;
 }
 

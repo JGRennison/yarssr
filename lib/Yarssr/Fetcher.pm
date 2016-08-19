@@ -1,5 +1,8 @@
 package Yarssr::Fetcher;
 
+use strict;
+use warnings;
+
 use Yarssr::Parser;
 use Gtk2;
 use MIME::Base64;
@@ -68,7 +71,7 @@ sub _download {
 		sub {
 			my ($data, $headers) = @_;
 			Yarssr->log_debug("Fetched: '$url', got status: " . $headers->{Status} . ": " . $headers->{Reason} .
-					", type: " . $headers->{"content-type"} . ", length: " . length $data . " bytes");
+					", type: " . ($headers->{"content-type"} // '[none]') . ", length: " . (length $data // 0) . " bytes");
 			my $ok = $headers->{Status} == 200;
 			$cv->send({
 				content => $ok ? $data : undef,

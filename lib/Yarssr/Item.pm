@@ -1,5 +1,8 @@
 package Yarssr::Item;
 
+use strict;
+use warnings;
+
 sub new {
 	my $class = shift;
 	my (%options) = @_;
@@ -24,6 +27,8 @@ sub get_pseudo_id {
 }
 
 foreach my $field (qw(title url status parent id)) {
+	no strict 'refs';
+
 	*{"get_$field"} = sub {
 		my $self = shift;
 		return $self->{$field};

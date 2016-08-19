@@ -1,4 +1,8 @@
 package Yarssr::FeedIcon;
+
+use strict;
+use warnings;
+
 use Yarssr::Fetcher;
 use File::Slurp;
 use AnyEvent;
