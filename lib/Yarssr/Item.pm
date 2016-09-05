@@ -18,7 +18,7 @@ sub new {
 
 	$self->{'status'} = 4;
 
-	bless $self,$class;
+	bless $self, $class;
 }
 
 sub get_pseudo_id {

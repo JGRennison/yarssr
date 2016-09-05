@@ -10,7 +10,7 @@ use AnyEvent;
 use AnyEvent::HTTP;
 use URI::URL;
 
-use constant TRUE=>1,FALSE=>0;
+use constant TRUE => 1,FALSE => 0;
 
 sub fetch_feed {
 	my ($pkg, $feed) = @_;

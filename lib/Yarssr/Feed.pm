@@ -7,7 +7,7 @@ use Yarssr::Fetcher;
 use Yarssr::FeedIcon;
 use AnyEvent;
 
-use constant TRUE=>1;
+use constant TRUE => 1;
 
 sub new {
 	my $class  = shift;
@@ -95,29 +95,25 @@ sub get_icon {
 	return $self->{'icon'}->get_pixbuf;
 }
 
-sub enable
-{
+sub enable {
 	my $self = shift;
 	$self->{'enabled'} = 1;
 	return 1;
 }
 
-sub disable
-{
+sub disable {
 	my $self = shift;
 	$self->{'enabled'} = 0;
 	return 1;
 }
 
-sub enable_and_flag
-{
+sub enable_and_flag {
 	my $self = shift;
 	$self->{'enabled'} = 3;
 	return 1;
 }
 
-sub toggle_enabled
-{
+sub toggle_enabled {
 	my $self = shift;
 	if ($self->{'enabled'}) {
 		$self->disable;
@@ -142,14 +138,12 @@ sub check_url {
 	return 0;
 }
 
-sub get_enabled
-{
+sub get_enabled {
 	my $self = shift;
 	return $self->{'enabled'};
 }
 
-sub update
-{
+sub update {
 	my $self = shift;
 	my @items;
 	my $cv = AnyEvent::condvar;

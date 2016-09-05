@@ -23,7 +23,7 @@ our $URL		= 'https://github.com/JGRennison/yarssr';
 our $OLDURL		= 'http://yarssr.sf.net';
 our $AUTHOR		= "Lee Aylward";
 our @COAUTHORS	= ( "James Curbo","Dan Leski","Jonathan Rennison" );
-our @TESTERS	= (	"Thanks to Joachim Breitner for testing\n".
+our @TESTERS	= ( "Thanks to Joachim Breitner for testing\n" .
 					"and maintaining the Debian package");
 our $debug = 0;
 our @EXPORT_OK = qw(_);
@@ -40,14 +40,13 @@ sub init {
 	bindtextdomain(lc($NAME), sprintf('%s/share/locale', $PREFIX));
 	textdomain(lc($NAME));
 
-	Gnome2::Program->init($0,$VERSION);
+	Gnome2::Program->init($0, $VERSION);
 	Yarssr::Config->init;
 	Yarssr::Config->load_initial_state;
 
 	my $cv = AnyEvent::condvar;
 	$cv->cb(\&initial_launch);
 	Yarssr::GUI->init($cv);
-
 }
 
 sub quit {
@@ -57,8 +56,8 @@ sub quit {
 
 sub log_debug {
 	return unless $debug;
-	my ($sec,$min,$hour,undef) = localtime;
-	my $time = sprintf("%02d:%02d:%02d",$hour,$min,$sec);
+	my ($sec, $min, $hour, undef) = localtime;
+	my $time = sprintf("%02d:%02d:%02d", $hour, $min, $sec);
 	print STDERR "[$time] $_[1]\n" if -t;
 }
 
@@ -74,7 +73,7 @@ sub initial_launch {
 }
 
 sub add_feed {
-	my (undef,$feed)  = @_;
+	my (undef, $feed)  = @_;
 	ref $feed eq 'Yarssr::Feed' or die;
 
 	return 0 if (Yarssr->get_feed_by_url($feed->get_url) and
@@ -85,13 +84,11 @@ sub add_feed {
 	return 1;
 }
 
-sub get_feeds_array
-{
+sub get_feeds_array {
 	return @feeds;
 }
 
-sub download_feed
-{
+sub download_feed {
 	my (undef, $feed) = @_;
 	my $activity_guard = Yarssr::GUI->get_icon_activity_guard();
 	$feed->update->cb(sub {
@@ -101,8 +98,7 @@ sub download_feed
 	});
 }
 
-sub download_all
-{
+sub download_all {
 	Yarssr->log_debug("download_all");
 	my $cv = AnyEvent->condvar;
 	my $activity_guard = Yarssr::GUI->get_icon_activity_guard();
@@ -123,7 +119,7 @@ sub download_all
 }
 
 sub get_feed_by_url {
-	my (undef,$url) = @_;
+	my (undef, $url) = @_;
 	for (@feeds) {
 		return $_ if $_->get_url eq $url;
 	}
@@ -131,7 +127,7 @@ sub get_feed_by_url {
 }
 
 sub get_feed_by_title {
-	my (undef,$title) = @_;
+	my (undef, $title) = @_;
 	for (@feeds) {
 		return $_ if $_->get_title eq $title;
 	}
@@ -139,11 +135,11 @@ sub get_feed_by_title {
 }
 
 sub remove_feed {
-	my (undef,$feed) = @_;
+	my (undef, $feed) = @_;
 	die unless ref $feed eq 'Yarssr::Feed';
 	for (0 .. $#feeds) {
 		if ($feeds[$_]->get_title eq $feed->get_title) {
-			splice @feeds,$_,1;
+			splice @feeds, $_, 1;
 			$feed = undef;
 			last;
 		}
@@ -153,7 +149,7 @@ sub remove_feed {
 sub get_total_newitems {
 	my $newitems = 0;
 	for (@feeds) {
-	$newitems += $_->get_newitems;
+		$newitems += $_->get_newitems;
 	}
 	return $newitems;
 }
@@ -173,7 +169,7 @@ sub clear_newitems {
 }
 
 sub clear_newitems_in_feed {
-	my (undef,$feed) = @_;
+	my (undef, $feed) = @_;
 	$feed->clear_newitems;
 	$feed->reset_newitems;
 }
