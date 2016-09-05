@@ -329,8 +329,6 @@ sub quit {
 	write_states();
 }
 
-no strict;
-
 foreach my $field (qw(browser usegnome interval maxfeeds online startonline clearnewonrestart)) {
 	no strict 'refs';
 

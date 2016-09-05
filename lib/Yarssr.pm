@@ -29,7 +29,6 @@ our $debug = 0;
 our @EXPORT_OK = qw(_);
 
 my @feeds;
-my $downloads_active = 0;
 $0 = $NAME;
 
 sub init {
