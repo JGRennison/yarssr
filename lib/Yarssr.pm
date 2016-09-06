@@ -29,6 +29,7 @@ our $debug = 0;
 our @EXPORT_OK = qw(_);
 
 my @feeds;
+my $last_download_all_time = 0;
 $0 = $NAME;
 
 sub init {
@@ -64,9 +65,7 @@ sub log_debug {
 sub initial_launch {
 	Yarssr->log_debug("initial_launch");
 	Yarssr::GUI->redraw_menu;
-	if (Yarssr::Config->get_startonline) {
-		download_all();
-	}
+	Yarssr::Config->schedule_timer;
 
 	return 0;
 }
@@ -99,6 +98,7 @@ sub download_feed {
 
 sub download_all {
 	Yarssr->log_debug("download_all");
+	$last_download_all_time = time;
 	my $cv = AnyEvent->condvar;
 	my $activity_guard = Yarssr::GUI->get_icon_activity_guard();
 	$cv->begin;
@@ -113,8 +113,13 @@ sub download_all {
 		undef $activity_guard;
 		Yarssr::GUI->redraw_menu;
 		Yarssr::Config->write_states;
+		Yarssr::Config->schedule_timer;
 	});
 	return 1;
+}
+
+sub get_last_download_all_time {
+	return $last_download_all_time;
 }
 
 sub get_feed_by_url {

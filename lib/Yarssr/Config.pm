@@ -19,14 +19,11 @@ my $config = $configdir . 'config';
 
 my $options;
 my $timer;
+my $clock_check_timer;
 
 sub init {
 	my $class = shift;
 	$options = load_config();
-	if ($options->{'startonline'}) {
-		$timer = Glib::Timeout->add($options->{'interval'} * 60_000,
-			sub { Yarssr->download_all; 1; });
-	}
 }
 
 sub load_config {
@@ -226,16 +223,53 @@ sub set_maxfeeds {
 	}
 }
 
+sub schedule_timer {
+	my $interval = $options->{'online'} ? $options->{'interval'} : 0;
+
+	my $need_check_timer = $interval > 5;
+	if ($need_check_timer && !defined $clock_check_timer) {
+		my $prev_time = time;
+		$clock_check_timer = Glib::Timeout->add(90_000, sub {
+			my $now_time = time;
+			if ($now_time - $prev_time >= 180) {
+				# Clock has jumped by >= 90s into the future
+				# This probably indicates a suspend/resume has taken place
+				# Reschedule timer
+				Yarssr->log_debug(_("Clock jump, rescheduling timer"));
+				schedule_timer();
+			}
+			$prev_time = $now_time;
+
+			1;
+		});
+	} elsif (!$need_check_timer && defined $clock_check_timer) {
+		Glib::Source->remove($clock_check_timer);
+		$clock_check_timer = undef;
+	}
+
+	Glib::Source->remove($timer) if $timer;
+	$timer = undef;
+	if ($interval > 0) {
+		my $last_download_time = Yarssr->get_last_download_all_time;
+		my $time_left = ($last_download_time + ($interval * 60)) - time;
+		if ($time_left <= 0) {
+			Yarssr->download_all;
+		} else {
+			$timer = Glib::Timeout->add($time_left * 1_000, sub {
+					$timer = undef;
+					Yarssr->download_all;
+					0;
+				});
+		}
+	}
+}
+
 sub set_interval {
 	my $class = shift;
 	my $interval = shift;
 	Yarssr->log_debug(_("Updating interval timer"));
 	$options->{'interval'} = $interval;
-	if ($options->{online}) {
-		Glib::Source->remove($timer) if $timer;
-		$timer = Glib::Timeout->add($interval * 60_000,
-			sub { Yarssr->download_all; Yarssr::GUI->redraw_menu; 1; });
-	}
+	schedule_timer();
 }
 
 sub set_browser {
@@ -345,15 +379,10 @@ sub set_online {
 
 	if ($bool) {
 		Yarssr->log_debug(_("Online mode"));
-		Yarssr->download_all;
-		set_interval(undef,$options->{interval});
 	} else {
 		Yarssr->log_debug(_("Offline mode"));
-		if ($timer) {
-			Glib::Source->remove($timer);
-			$timer = undef;
-		}
 	}
+	schedule_timer();
 }
 
 1;
