@@ -206,6 +206,7 @@ sub prefs_show {
 		"Glib::String",      #url
 		"Glib::String",      #username
 		"Glib::String",      #password
+		"Glib::Boolean",     #excludenew
 	);
 
 	$treeview->set_model($liststore);
@@ -226,6 +227,7 @@ sub prefs_show {
 			3	=> $_->get_url,
 			4	=> defined $_->get_username ? $_->get_username : 0,
 			5	=> defined $_->get_password ? $_->get_password : 0,
+			6	=> $_->get_excludenew,
 		);
 	}
 
@@ -347,6 +349,7 @@ sub feedinfo_add {
 	my $url = $gld->get_widget('feedinfo_address');
 	my $username = $gld->get_widget('feedinfo_username');
 	my $password = $gld->get_widget('feedinfo_password');
+	my $excludenew = $gld->get_widget('feedinfo_exclude_new');
 	my $ok_button = $gld->get_widget('feedinfo_ok_button');
 	my $liststore = $treeview->get_model;
 
@@ -362,6 +365,7 @@ sub feedinfo_add {
 			3	=> $url->get_text,
 			4	=> $username->get_text,
 			5	=> $password->get_text,
+			6	=> $excludenew->get_active,
 		);
 	}
 
@@ -374,6 +378,7 @@ sub feedinfo_dialog_clear {
 	$gld->get_widget('feedinfo_address')->set_text('');
 	$gld->get_widget('feedinfo_username')->set_text('');
 	$gld->get_widget('feedinfo_password')->set_text('');
+	$gld->get_widget('feedinfo_exclude_new')->set_active(0);
 	$gld->get_widget('feedinfo_options')->set_expanded(0);
 }
 
@@ -655,6 +660,7 @@ sub on_properties_button_clicked {
 	$gld->get_widget('feedinfo_address')->set_text($row[3]);
 	$gld->get_widget('feedinfo_username')->set_text($row[4]);
 	$gld->get_widget('feedinfo_password')->set_text($row[5]);
+	$gld->get_widget('feedinfo_exclude_new')->set_active($row[6]);
 
 
 	my $ok_button = $gld->get_widget('feedinfo_ok_button');
@@ -683,12 +689,14 @@ sub properties_change {
 	my $new_url = $gld->get_widget('feedinfo_address')->get_text;
 	my $new_username = $gld->get_widget('feedinfo_username')->get_text;
 	my $new_password = $gld->get_widget('feedinfo_password')->get_text;
+	my $new_excludenew = $gld->get_widget('feedinfo_exclude_new')->get_active;
 
 	$liststore->set($iter,
 		1	=> $new_title,
 		3	=> $new_url,
 		4	=> $new_username,
 		5	=> $new_password,
+		6	=> $new_excludenew,
 	);
 
 	# Need to figure out some way to apply this only when
@@ -699,6 +707,7 @@ sub properties_change {
 		$feed->set_username($new_username);
 		$feed->set_password($new_password);
 		$feed->enable_and_flag if $feed->get_enabled;
+		$feed->set_excludenew($new_excludenew);
 	}
 
 	feedinfo_dialog_clear();

@@ -63,7 +63,7 @@ sub unshift_item {
 	#reverse(sort {$a->get_date <=> $b->get_date} @{$self->{'items'}});
 }
 
-foreach my $field (qw(title date url interval menu username password last_modified icon_last_modified)) {
+foreach my $field (qw(title date url interval menu username password last_modified icon_last_modified excludenew)) {
 	no strict 'refs';
 
 	*{"get_$field"} = sub {

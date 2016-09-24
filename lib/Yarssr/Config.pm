@@ -76,6 +76,7 @@ sub load_config {
 						enabled    => $_->{enabled},
 						username   => $_->{username},
 						password   => $_->{password},
+						excludenew => $_->{excludenew},
 					);
 
 					Yarssr->add_feed($feed);
@@ -141,6 +142,7 @@ sub write_config {
 			enabled    => to_json_bool($feed->get_enabled),
 			username   => $feed->get_username,
 			password   => $feed->get_password,
+			excludenew => to_json_bool($feed->get_excludenew),
 		};
 	}
 	my $obj = {

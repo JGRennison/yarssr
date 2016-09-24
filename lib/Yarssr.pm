@@ -153,7 +153,7 @@ sub remove_feed {
 sub get_total_newitems {
 	my $newitems = 0;
 	for (@feeds) {
-		$newitems += $_->get_newitems;
+		$newitems += $_->get_newitems unless $_->get_excludenew;
 	}
 	return $newitems;
 }
