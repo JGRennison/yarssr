@@ -8,6 +8,8 @@ use Yarssr::Feed;
 use Data::Dumper;
 use AnyEvent;
 use File::Slurp;
+use JSON;
+use Scalar::Util qw(looks_like_number);
 
 use warnings;
 use strict;
@@ -51,35 +53,37 @@ sub load_config {
 			or warn "Failed to make state directory: $!\n";
 	}
 	if (-e $config) {
-		my @lines = read_file($config, binmode => ':utf8')
+		my $file = read_file($config, binmode => ':utf8')
 			or warn "Failed to open config file for reading: $!\n";
-		for (@lines) {
-			chomp;
-
-			if (/^feed=(.*);(.*);(\d)(?:;(.*):(.*))?/) {
-				my $feed = Yarssr::Feed->new(
-					url	=> $1,
-					title	=> $2,
-					enabled	=> $3,
-					username => $4,
-					password => $5,
-				);
-
-				Yarssr->add_feed($feed);
-				#load_state($feed);
-			} elsif (/^interval=(\d+)/) {
-				$return->{interval} = $1;
-			} elsif (/^maxfeeds=(\d+)/) {
-				$return->{maxfeeds} = $1;
-			} elsif (/^browser=(.*)/) {
-				$return->{browser} = $1;
-			} elsif (/^usegnome=(\d)/) {
-				$return->{usegnome} = $1;
-			} elsif (/^startonline=(\d)/) {
-				$return->{startonline} = $1;
+		if ($file =~ /^[a-z]+=/) {
+			# old-style config
+			load_old_config(undef, $return, $file);
+		} else {
+			eval {
+				my $obj = decode_json($file);
+				$return->{interval} = $obj->{interval} if looks_like_number($obj->{interval}) && $obj->{interval} >= 0;
+				$return->{maxfeeds} = $obj->{maxfeeds} if looks_like_number($obj->{maxfeeds}) && $obj->{maxfeeds} >= 0;
+				$return->{browser} = $obj->{browser} if defined $obj->{browser};
+				$return->{usegnome} = $obj->{usegnome} if JSON::is_bool($obj->{usegnome});
+				$return->{startonline} = $obj->{startonline} if JSON::is_bool($obj->{startonline});
 				$return->{online} = $return->{startonline};
-			} elsif (/^clearnewonrestart=(\d)/) {
-				$return->{clearnewonrestart} = $1;
+				$return->{clearnewonrestart} = $obj->{clearnewonrestart} if JSON::is_bool($obj->{clearnewonrestart});
+				my @feeds = @{ $obj->{feeds} };
+				for (@feeds) {
+					my $feed = Yarssr::Feed->new(
+						url        => $_->{url},
+						title      => $_->{title},
+						enabled    => $_->{enabled},
+						username   => $_->{username},
+						password   => $_->{password},
+					);
+
+					Yarssr->add_feed($feed);
+				}
+			};
+			if ($@) {
+				warn "Error whilst parsing config: $@";
+				return $return;
 			}
 		}
 	}
@@ -88,22 +92,69 @@ sub load_config {
 	return $return;
 }
 
+sub load_old_config {
+	my (undef, $return, $text) = @_;
+	my @lines = split("\n", $text);
+	for (@lines) {
+		chomp;
+
+		if (/^feed=(.*);(.*);(\d)(?:;(.*):(.*))?/) {
+			my $feed = Yarssr::Feed->new(
+				url      => $1,
+				title    => $2,
+				enabled  => $3,
+				username => $4,
+				password => $5,
+			);
+
+			Yarssr->add_feed($feed);
+			#load_state($feed);
+		} elsif (/^interval=(\d+)/) {
+			$return->{interval} = $1;
+		} elsif (/^maxfeeds=(\d+)/) {
+			$return->{maxfeeds} = $1;
+		} elsif (/^browser=(.*)/) {
+			$return->{browser} = $1;
+		} elsif (/^usegnome=(\d)/) {
+			$return->{usegnome} = $1;
+		} elsif (/^startonline=(\d)/) {
+			$return->{startonline} = $1;
+			$return->{online} = $return->{startonline};
+		} elsif (/^clearnewonrestart=(\d)/) {
+			$return->{clearnewonrestart} = $1;
+		}
+	}
+}
+
+sub to_json_bool {
+	return $_[0] ? JSON::true : JSON::false;
+}
+
 sub write_config {
 	Yarssr->log_debug(_("Writing config"));
 
-	my @lines;
-	push @lines, "interval=" . $options->{'interval'} . "\n";
-	push @lines, "maxfeeds=" . $options->{'maxfeeds'} . "\n";
-	push @lines, "browser=" . $options->{'browser'} . "\n";
-	push @lines, "usegnome=" . $options->{'usegnome'} . "\n";
-	push @lines, "startonline=" . $options->{'startonline'} . "\n";
-	push @lines, "clearnewonrestart=" . $options->{'clearnewonrestart'} . "\n";
+	my @feeds;
 	for my $feed (Yarssr->get_feeds_array) {
-		push @lines, "feed=" . $feed->get_url . ";" . $feed->get_title .
-			";" . $feed->get_enabled . ";" . $feed->get_username . ":" .
-			$feed->get_password . "\n";
+		push @feeds, {
+			url        => $feed->get_url,
+			title      => $feed->get_title,
+			enabled    => to_json_bool($feed->get_enabled),
+			username   => $feed->get_username,
+			password   => $feed->get_password,
+		};
 	}
-	write_file($config, { atomic => 1, binmode => ':utf8' }, @lines);
+	my $obj = {
+		interval          => $options->{'interval'},
+		maxfeeds          => $options->{'maxfeeds'},
+		browser           => $options->{'browser'},
+		usegnome          => to_json_bool($options->{'usegnome'}),
+		startonline       => to_json_bool($options->{'startonline'}),
+		clearnewonrestart => to_json_bool($options->{'clearnewonrestart'}),
+		feeds             => \@feeds,
+	};
+
+	my $file = to_json($obj, {utf8 => 1, pretty => 1});
+	write_file($config, { atomic => 1, binmode => ':utf8' }, $file);
 }
 
 sub write_states {
