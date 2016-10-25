@@ -9,6 +9,7 @@ use Yarssr::Feed;
 use XML::LibXML;
 use XML::Parser;
 use XML::RSS;
+use URI::URL;
 
 $XML::RSS::AUTO_ADD = 1;
 
@@ -39,6 +40,7 @@ sub parse {
 sub parse_rss {
 	my ($feed, $content) = @_;
 	my @items;
+	my $base_url = $feed->get_url;
 	my $parser = new XML::RSS;
 
 	eval { $parser->parse($content); };
@@ -49,7 +51,7 @@ sub parse_rss {
 	} else {
 		eval {
 			if ($parser->{'image'} && $parser->{'image'}->{'url'}) {
-				$feed->set_icon_url_update($parser->{'image'}->{'url'});
+				$feed->set_icon_url_update(URI::URL->new($parser->{'image'}->{'url'}, $base_url)->abs);
 			}
 		};
 		warn $@ if $@;
@@ -58,10 +60,10 @@ sub parse_rss {
 			my $item = ${$parser->{'items'}}[$count];
 			my $link = $item->{'link'};
 			$link = $item->{'guid'} unless $link;
-			my $id = $item->{'guid'};
-
-			# Fix amperstands
+			# Fix ampersands
 			$link =~ s/&amp;/&/g;
+			$link = URI::URL->new($link, $base_url)->abs;
+			my $id = $item->{'guid'};
 
 			my $article = Yarssr::Item->new(
 				url     => $link,
@@ -77,6 +79,7 @@ sub parse_rss {
 sub parse_atom {
 	my ($feed, $doc) = @_;
 	my @items;
+	my $base_url = $feed->get_url;
 
 	my $xpc = XML::LibXML::XPathContext->new;
 	$xpc->registerNs('x', $doc->documentElement()->namespaceURI());
@@ -89,7 +92,7 @@ sub parse_atom {
 		$icon = $_->textContent for $xpc->findnodes('x:logo', $doc->documentElement());
 		$icon = $_->textContent for $xpc->findnodes('x:icon', $doc->documentElement());
 		if ($icon) {
-			$feed->set_icon_url_update($icon);
+			$feed->set_icon_url_update(URI::URL->new($icon, $base_url)->abs);
 		}
 	};
 	warn $@ if $@;
@@ -103,7 +106,7 @@ sub parse_atom {
 		}
 		foreach ($xpc->findnodes('x:link', $entry)) {
 			if (!length $_->getAttribute("rel") || $_->getAttribute("rel") eq "alternate") {
-				$link = $_->getAttribute("href");
+				$link = URI::URL->new($_->getAttribute("href"), $base_url)->abs;
 			}
 		}
 		foreach ($xpc->findnodes('x:id', $entry)) {
