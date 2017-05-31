@@ -23,7 +23,16 @@ sub new {
 
 sub get_pseudo_id {
 	my $self = shift;
-	return $self->{url} . "___" . $self->{title};
+	my $url = '';
+	my $check_title = 1;
+	if ($self->{url}) {
+		$url = URI->new($self->{url});
+		$url->scheme('scheme');
+		$check_title = length $url->path_query > 0;
+	}
+	my $psid = $url;
+	$psid .= "___" . $self->{title} if $check_title && length $self->{title};
+	return $psid;
 }
 
 foreach my $field (qw(title url status parent id)) {
