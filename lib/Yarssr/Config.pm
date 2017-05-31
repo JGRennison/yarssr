@@ -197,8 +197,8 @@ sub write_state {
 		}
 
 		my @args = (
-			title	=> $item->get_title,
-			link	=> $item->get_url,
+			title	=> $item->get_title // '',
+			link	=> $item->get_url // '',
 		);
 		my $yarssr_ns = {
 			read => $status,
