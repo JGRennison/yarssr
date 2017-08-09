@@ -420,7 +420,7 @@ sub create_root_menu {
 	for my $feed (Yarssr->get_feeds_array) {
 		if ($feed->get_enabled) {
 			my $title = $feed->get_title;
-			my $menuitem = Gtk2::ImageMenuItem->new($title);
+			my $menuitem = Gtk2::ImageMenuItem->new_with_label($title);
 			$menuitem->child->set_markup("<b>$title</b>") if $feed->get_newitems;
 
 			if (defined $feed->get_status and $feed->get_status > 0) {
@@ -508,7 +508,7 @@ sub create_feed_menu {
 			$title .= $_;
 		}
 
-		my $menuitem = Gtk2::ImageMenuItem->new($title);
+		my $menuitem = Gtk2::ImageMenuItem->new_with_label($title);
 		my $status = $item->get_status;
 
 		if ($status == 4 or $status == 3) {
