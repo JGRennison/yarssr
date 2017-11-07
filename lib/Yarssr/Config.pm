@@ -207,7 +207,7 @@ sub write_state {
 		push @args, (yarssr => $yarssr_ns);
 		$rss->add_item(@args);
 	}
-	write_file($statedir . $feed->get_title() . ".xml", { atomic => 1, binmode => ':utf8' }, $rss->as_string);
+	write_file($statedir . $feed->get_state_file_stem() . ".xml", { atomic => 1, binmode => ':utf8' }, $rss->as_string);
 
 	return 0;
 }
@@ -221,7 +221,7 @@ sub load_initial_state {
 
 sub load_state {
 	my $feed = shift;
-	my $file = $statedir.$feed->get_title . ".xml";
+	my $file = $statedir.$feed->get_state_file_stem . ".xml";
 	if (-e $file) {
 		Yarssr->log_debug(_("Loading state for {feed}", feed => $feed->get_title));
 		my $rss = new XML::RSS;

@@ -95,6 +95,11 @@ sub get_icon {
 	return $self->{'icon'}->get_pixbuf;
 }
 
+sub get_state_file_stem {
+	my $self = shift;
+	return $self->get_title =~ s/\//_/rg;
+}
+
 sub enable {
 	my $self = shift;
 	$self->{'enabled'} = 1;

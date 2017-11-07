@@ -15,7 +15,7 @@ sub new {
 	my $icondir = $Yarssr::Config::icondir;
 
 	my $self = {
-		iconfile    => $icondir.$feed->get_title . ".ico",
+		iconfile    => $icondir.$feed->get_state_file_stem . ".ico",
 		feed        => $feed,
 	};
 
