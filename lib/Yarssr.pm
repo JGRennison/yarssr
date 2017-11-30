@@ -166,16 +166,17 @@ sub newitems_exist {
 }
 
 sub clear_newitems {
+	my (undef, $status) = @_;
 	for (@feeds) {
-		$_->clear_newitems;
-		$_->reset_newitems;
+		$_->clear_newitems($status);
+		$_->reset_newitems();
 	}
 }
 
 sub clear_newitems_in_feed {
-	my (undef, $feed) = @_;
-	$feed->clear_newitems;
-	$feed->reset_newitems;
+	my (undef, $feed, $status) = @_;
+	$feed->clear_newitems($status);
+	$feed->reset_newitems();
 }
 
 sub _ {

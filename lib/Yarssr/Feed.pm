@@ -239,10 +239,16 @@ sub reset_newitems {
 	$self->{'newitems'} = 0;
 }
 
+sub get_newitems_array {
+	my $self = shift;
+	return grep { $_->get_status > 2 } $self->get_items_array;
+}
+
 sub clear_newitems {
 	my $self = shift;
-	for ($self->get_items_array) {
-		$_->set_status(2) if $_->get_status > 2;
+	my $new_status = shift // 2;
+	for ($self->get_newitems_array) {
+		$_->set_status($new_status);
 	}
 }
 
