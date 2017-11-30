@@ -11,6 +11,7 @@ use Gnome2;
 use Yarssr::Config;
 use Yarssr::Parser;
 use Yarssr::Fetcher;
+use Yarssr::Browser;
 use Data::Dumper;
 use POSIX ":sys_wait_h";
 use Guard;
@@ -403,7 +404,9 @@ sub create_root_menu {
 	$menu = Gtk2::Menu->new;
 	my $refresh = Gtk2::ImageMenuItem->new_from_stock('gtk-refresh');
 	my $clear_new = Gtk2::ImageMenuItem->new(_("_Unmark new"));
+	my $open_new = Gtk2::ImageMenuItem->new(_("_Open new"));
 	$clear_new->set_image(Gtk2::Image->new_from_stock('gtk-clear', 'menu'));
+	$open_new->set_image(Gtk2::Image->new_from_stock('gtk-dnd-multiple', 'menu'));
 	$refresh->signal_connect('activate', sub {
 		$menu->popdown;
 		Gtk2->main_iteration while Gtk2->events_pending;
@@ -413,8 +416,19 @@ sub create_root_menu {
 		Yarssr->clear_newitems;
 		redraw_menu();
 	});
+	$open_new->signal_connect('activate', sub {
+		for my $feed (Yarssr->get_feeds_array) {
+			foreach my $item ($feed->get_newitems_array) {
+				launch_url($item->get_url);
+			}
+		}
+		Yarssr->clear_newitems(1);
+		redraw_menu();
+	});
 	$menu->append($refresh);
 	$menu->append($clear_new);
+	$menu->append($open_new);
+
 	$menu->append(Gtk2::SeparatorMenuItem->new);
 
 	for my $feed (Yarssr->get_feeds_array) {
@@ -548,6 +562,16 @@ sub create_feed_menu {
 			redraw_menu();
 		});
 	$feed->get_menu->append($unmark);
+	my $open_new = Gtk2::ImageMenuItem->new(_("_Open new"));
+	$open_new->set_image(Gtk2::Image->new_from_stock('gtk-dnd-multiple', 'menu'));
+	$open_new->signal_connect('activate', sub {
+			foreach my $item ($feed->get_newitems_array) {
+				launch_url($item->get_url);
+			}
+			Yarssr->clear_newitems_in_feed($feed, 1);
+			redraw_menu();
+		});
+	$feed->get_menu->append($open_new);
 	$feed->get_menu->show_all;
 }
 
