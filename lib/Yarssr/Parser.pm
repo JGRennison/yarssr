@@ -63,7 +63,7 @@ sub parse_rss {
 			# Fix ampersands
 			$link =~ s/&amp;/&/g;
 			$link = URI::URL->new($link, $base_url)->abs;
-			my $id = $item->{'guid'};
+			my $id = $item->{'guid'} || $item->{'permaLink'};
 
 			my $article = Yarssr::Item->new(
 				url     => $link,
