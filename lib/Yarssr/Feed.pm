@@ -179,6 +179,9 @@ sub update {
 				$self->{status} = 2;
 			}
 
+			# Limit to first 50 items
+			splice(@items, 50);
+
 			for my $item (reverse @items) {
 				my $existing_item = $self->get_item_by_id($item->get_id(), $item->get_pseudo_id());
 				if ($existing_item) {
