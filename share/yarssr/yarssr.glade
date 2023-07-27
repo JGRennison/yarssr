@@ -323,29 +323,6 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkCheckButton" id="use_default_browser_checkbox">
-	      <property name="visible">True</property>
-	      <property name="can_focus">True</property>
-	      <property name="label" translatable="yes">Gnome Default</property>
-	      <property name="use_underline">True</property>
-	      <property name="relief">GTK_RELIEF_NORMAL</property>
-	      <property name="focus_on_click">True</property>
-	      <property name="active">False</property>
-	      <property name="inconsistent">False</property>
-	      <property name="draw_indicator">True</property>
-	      <signal name="toggled" handler="Yarssr::GUI::on_use_default_browser_checkbox_toggled" last_modification_time="Sun, 08 Aug 2004 16:57:12 GMT"/>
-	    </widget>
-	    <packing>
-	      <property name="left_attach">2</property>
-	      <property name="right_attach">3</property>
-	      <property name="top_attach">2</property>
-	      <property name="bottom_attach">3</property>
-	      <property name="x_options"></property>
-	      <property name="y_options"></property>
-	    </packing>
-	  </child>
-
-	  <child>
 	    <widget class="GtkEntry" id="browser_entry">
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>

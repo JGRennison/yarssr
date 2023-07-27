@@ -31,7 +31,6 @@ AnyEvent
 AnyEvent::HTTP
 URI::URL
 Guard
-Gnome2 >= 0.94
 
 Check INSTALL file for installation directions.
 

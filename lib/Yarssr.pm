@@ -3,7 +3,6 @@ package Yarssr;
 use strict;
 use warnings;
 
-use Gnome2;
 use Gtk2;
 use Yarssr::GUI;
 use Yarssr::Config;
@@ -40,7 +39,6 @@ sub init {
 	bindtextdomain(lc($NAME), sprintf('%s/share/locale', $PREFIX));
 	textdomain(lc($NAME));
 
-	Gnome2::Program->init($0, $VERSION);
 	Yarssr::Config->init;
 	Yarssr::Config->load_initial_state;
 

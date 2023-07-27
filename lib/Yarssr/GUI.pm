@@ -7,7 +7,6 @@ use Gtk2;
 use Gtk2::GladeXML;
 use Gtk2::SimpleList;
 use Gtk2::TrayIcon;
-use Gnome2;
 use Yarssr::Config;
 use Yarssr::Parser;
 use Yarssr::Fetcher;
@@ -175,27 +174,23 @@ sub update_icon_state {
 sub launch_url {
 	my $url = shift;
 
-	if (Yarssr::Config->get_usegnome) {
-		Gnome2::URL->show($url);
-	} else {
-		if (my $child = fork) {
-			Glib::Timeout->add(200,
-				sub {
-					my $kid = waitpid($child, WNOHANG);
-					$kid > 0 ? return 0 : return 1;
-				}
-			);
-		} else {
-			my $b = Yarssr::Config->get_browser;
-			my @b = split(' ', Yarssr::Config->get_browser);
-			if (grep(/\%s/, @b)) {
-				map { grep(s/\%s/$url/, $_) => $_ } @b;
-			} else {
-				push(@b, $url);
+	if (my $child = fork) {
+		Glib::Timeout->add(200,
+			sub {
+				my $kid = waitpid($child, WNOHANG);
+				$kid > 0 ? return 0 : return 1;
 			}
-			exec(@b) or warn "unable to launch browser\n";
-			exit;
+		);
+	} else {
+		my $b = Yarssr::Config->get_browser;
+		my @b = split(' ', Yarssr::Config->get_browser);
+		if (grep(/\%s/, @b)) {
+			map { grep(s/\%s/$url/, $_) => $_ } @b;
+		} else {
+			push(@b, $url);
 		}
+		exec(@b) or warn "unable to launch browser\n";
+		exit;
 	}
 }
 
@@ -235,10 +230,6 @@ sub prefs_show {
 	$gld->get_widget('interval_entry')->set_text(Yarssr::Config->get_interval);
 	$gld->get_widget('headings_entry')->set_text(Yarssr::Config->get_maxfeeds);
 	$gld->get_widget('browser_entry')->set_text(Yarssr::Config->get_browser);
-	$gld->get_widget('browser_entry')->set_sensitive(
-		!Yarssr::Config->get_usegnome);
-	$gld->get_widget('use_default_browser_checkbox')->set_active(
-		Yarssr::Config->get_usegnome);
 	$gld->get_widget('start_online_checkbutton')->set_active(
 		Yarssr::Config->get_startonline);
 	$gld->get_widget('clear_new_on_restart_checkbox')->set_active(
@@ -457,7 +448,6 @@ sub create_prefs_menu {
 	$pref_menu = Gtk2::Menu->new;
 	my $quit = Gtk2::ImageMenuItem->new_from_stock('gtk-quit');
 	my $prefs = Gtk2::ImageMenuItem->new_from_stock('gtk-preferences');
-	my $about = Gtk2::ImageMenuItem->new(_("_About"));
 
 	my $online;
 	my $imageroot = $Yarssr::PREFIX . "/share/yarssr/pixmaps/";
@@ -478,8 +468,6 @@ sub create_prefs_menu {
 			sub { Yarssr::Config->set_online(1); create_prefs_menu(); });
 	}
 
-	$about->set_image(Gtk2::Image->new_from_stock('gnome-stock-about', 'menu'));
-	$about->signal_connect('activate', \&on_about_button_clicked);
 	$prefs->signal_connect('activate', \&prefs_show);
 	$quit->signal_connect('activate', sub {
 		Yarssr::Config->write_config;
@@ -491,7 +479,6 @@ sub create_prefs_menu {
 	});
 	$pref_menu->append($online);
 	$pref_menu->append($prefs);
-	$pref_menu->append($about);
 	$pref_menu->append($quit);
 	$pref_menu->show_all;
 	return $pref_menu;
@@ -658,17 +645,6 @@ sub position_menu {
 
 sub gui_update {
 	Gtk2->main_iteration while Gtk2->events_pending;
-}
-
-sub on_about_button_clicked {
-	my $logo = $paper_grey_pixbuf->scale_simple(64, 64, 'tiles');
-	my $author = "$Yarssr::AUTHOR\n\n Patches from:\n";
-	$author .= "\t$_\n" for @Yarssr::COAUTHORS;
-	$author .= "\n$_" for @Yarssr::TESTERS;
-	my $about = Gnome2::About->new(
-		$Yarssr::NAME, $Yarssr::VERSION, $Yarssr::LICENSE,
-		$Yarssr::URL, $author, undef, 'German Translation: Joachim Breitner <mail@joachim-breitner.de>', $logo);
-	$about->show;
 }
 
 sub on_properties_button_clicked {

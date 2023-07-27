@@ -51,9 +51,6 @@ msgstr ""
 msgid "Go _Offline"
 msgstr ""
 
-msgid "_About"
-msgstr ""
-
 # Feeds menu
 msgid "updating..."
 msgstr ""

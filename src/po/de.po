@@ -50,9 +50,6 @@ msgstr "Gehe _Online"
 msgid "Go _Offline"
 msgstr "Gehe _Offline"
 
-msgid "_About"
-msgstr "_Info"
-
 # Feeds menu
 msgid "updating..."
 msgstr "aktualisieren..."
