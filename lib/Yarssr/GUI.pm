@@ -278,13 +278,6 @@ sub on_pref_ok_button_clicked {
 	my $browser = $gld->get_widget('browser_entry')->get_text;
 	my $online = $gld->get_widget('start_online_checkbutton')->get_active;
 	my $clearnewonrestart = $gld->get_widget('clear_new_on_restart_checkbox')->get_active;
-	my $usegnome;
-
-	if ($gld->get_widget('use_default_browser_checkbox')->get_active) {
-		$usegnome = 1;
-	} else {
-		$usegnome = 0;
-	}
 
 	my $newfeedlist;
 
@@ -296,26 +289,13 @@ sub on_pref_ok_button_clicked {
 	});
 
 	my $cv = Yarssr::Config->process(
-		$interval, $maxfeeds, $browser, $usegnome, $newfeedlist, $online, $clearnewonrestart);
+		$interval, $maxfeeds, $browser, $newfeedlist, $online, $clearnewonrestart);
 	$cv->cb(sub {
 		redraw_menu() if $cv->recv;
 		Yarssr::Config->write_config;
 	});
 
 	$treeview->set_model(undef);
-}
-
-
-sub on_use_default_browser_checkbox_toggled {
-	my ($widget, $window) = @_;
-
-	my $browser_entry = $gld->get_widget('browser_entry');
-
-	if ($widget->get_active) {
-		$browser_entry->set_sensitive(0);
-	} else {
-		$browser_entry->set_sensitive(1);
-	}
 }
 
 sub on_add_button_clicked {

@@ -33,9 +33,8 @@ sub load_config {
 	my $return = {
 		browser => 'mozilla',
 		interval => 60,
-		usegnome => 0,
 		maxfeeds => 8,
-		online	 => 1,
+		online => 1,
 		startonline => 1,
 		clearnewonrestart => 1,
 	};
@@ -64,7 +63,6 @@ sub load_config {
 				$return->{interval} = $obj->{interval} if looks_like_number($obj->{interval}) && $obj->{interval} >= 0;
 				$return->{maxfeeds} = $obj->{maxfeeds} if looks_like_number($obj->{maxfeeds}) && $obj->{maxfeeds} >= 0;
 				$return->{browser} = $obj->{browser} if defined $obj->{browser};
-				$return->{usegnome} = $obj->{usegnome} if JSON::is_bool($obj->{usegnome});
 				$return->{startonline} = $obj->{startonline} if JSON::is_bool($obj->{startonline});
 				$return->{online} = $return->{startonline};
 				$return->{clearnewonrestart} = $obj->{clearnewonrestart} if JSON::is_bool($obj->{clearnewonrestart});
@@ -116,8 +114,6 @@ sub load_old_config {
 			$return->{maxfeeds} = $1;
 		} elsif (/^browser=(.*)/) {
 			$return->{browser} = $1;
-		} elsif (/^usegnome=(\d)/) {
-			$return->{usegnome} = $1;
 		} elsif (/^startonline=(\d)/) {
 			$return->{startonline} = $1;
 			$return->{online} = $return->{startonline};
@@ -149,7 +145,6 @@ sub write_config {
 		interval          => $options->{'interval'},
 		maxfeeds          => $options->{'maxfeeds'},
 		browser           => $options->{'browser'},
-		usegnome          => to_json_bool($options->{'usegnome'}),
 		startonline       => to_json_bool($options->{'startonline'}),
 		clearnewonrestart => to_json_bool($options->{'clearnewonrestart'}),
 		feeds             => \@feeds,
@@ -330,11 +325,6 @@ sub set_browser {
 	$options->{'browser'} = shift;
 }
 
-sub set_usegnome {
-	my $class = shift;
-	$options->{'usegnome'} = shift;
-}
-
 sub set_clearnewonrestart {
 	my $class = shift;
 	$options->{'clearnewonrestart'} = shift;
@@ -343,12 +333,11 @@ sub set_clearnewonrestart {
 sub process {
 	my $class = shift;
 	my ($new_interval, $new_maxfeeds, $new_browser,
-		$new_usegnome, $newfeedlist, $online, $clearnewonrestart) = @_;
+		$newfeedlist, $online, $clearnewonrestart) = @_;
 	my $rebuild = 0;
 	my $cv = AnyEvent::condvar;
 
 	$options->{'browser'} = $new_browser;
-	$options->{'usegnome'} = $new_usegnome;
 
 	if ($online) {
 		$options->{'startonline'} = 1;
@@ -416,7 +405,7 @@ sub quit {
 	write_states();
 }
 
-foreach my $field (qw(browser usegnome interval maxfeeds online startonline clearnewonrestart)) {
+foreach my $field (qw(browser interval maxfeeds online startonline clearnewonrestart)) {
 	no strict 'refs';
 
 	*{"get_$field"} = sub {
